@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hero description="Held" gender="male" age="20" so="0">
+	<look><![CDATA[]]></look>
+	<status><![CDATA[]]></status>
+	<title><![CDATA[]]></title>
+	<story><![CDATA[]]></story>
+	<config>
+		<base-gp value="110"/>
+	</config>
+	<attributes>
+		<attribute name="Mut" shortname="MU" value="8" />
+		<attribute name="Klugheit" shortname="KL" value="8" />
+		<attribute name="Körperkraft" shortname="KK" value="8" />
+		<attribute name="Gewandheit" shortname="GE" value="8" />
+		<attribute name="Fingerfertigkeit" shortname="FF" value="8" />
+		<attribute name="Intuition" shortname="IN" value="8" />
+		<attribute name="Konstitution" shortname="KO" value="8" />
+		<attribute name="Charisma" shortname="CH" value="8" />
+		<attribute name="Sozialstatus" shortname="SO" value="0" />
+	</attributes>
+	<breedcontainer name="Rasse" />
+	<culturecontainer name="Kultur" />
+	<professioncontainer name="Profession" />
+	<procontainer name="Vorteile" >
+		<group name="Normal" />
+		<group name="Magisch"/>
+	</procontainer>
+	<contracontainer name="Nachteile" >
+		<group name="Normal" />
+		<group name="Magisch"/>
+	</contracontainer>
+	<specialcontainer name="Sonderfertigkeiten" >
+		<group name="Klerikale" />
+		<group name="Magische" />
+		<group name="Kampf" />
+		<group name="Allgemeine" />
+	</specialcontainer>
+	<talents name="Talente">
+		<group name="Kampf" >
+			<talent inc="D" type="base" name="Dolche" value="0" />
+			<talent inc="D" type="base" name="Hiebwaffen" value="0" />
+			<talent inc="C" type="base" name="Raufen" value="0" />
+			<talent inc="D" type="base" name="Ringen" value="0" />
+			<talent inc="D" type="base" name="Säbel"  value="0" />
+		</group>
+		<group inc="D" name="Körper" >
+			<talent inc="D" type="base" name="Athletik" test="GE/KO/KK" value="0" />
+			<talent inc="D" type="base" name="Klettern" test="MU/GE/KK" value="0" />
+			<talent inc="D" type="base" name="Selbstbeherrschung" test="MU/KO/KK" value="0" />
+			<talent inc="D" type="base" name="Körperbeherrschung" test="MU/IN/GE" value="0" />
+			<talent inc="D" type="base" name="Schleichen" test="MU/IN/GE" value="0" />
+			<talent inc="D" type="base" name="Schwimmen" test="GE/KO/KK" value="0" />
+			<talent inc="D" type="base" name="Sich Verstecken" test="MU/IN/GE" value="0" />
+			<talent inc="D" type="base" name="Singen" test="IN/CH/CH(KO)" value="0" />
+			<talent inc="D" type="base" name="Sinnenschärfen" test="KL/IN/IN(FF)" value="0" />
+			<talent inc="D" type="base" name="Tanzen" test="CH/GE/GE" value="0" />
+			<talent inc="D" type="base" name="Zechen" test="IN/KO/KK" value="0" />
+		</group>
+		<group inc="B" name="Natur" >
+			<talent inc="B" type="base" name="Fährtensuchen" test="KL/IN/IN(KO)" value="0" />
+			<talent inc="B" type="base" name="Orientierung" test="KL/IN/IN" value="0" />
+			<talent inc="B" type="base" name="Wildnisleben" test="IN/GE/KO" value="0" />
+		</group>
+		<group name="Wissen" >
+			<talent type="base" name="Rechnen" test="KL/KL/IN" value="0" />
+			<talent type="base" name="Götter/Kulte" test="KL/KL/IN" value="0" />
+			<talent type="base" name="Sagen/Legenden" test="KL/IN/CH" value="0" />
+		</group>
+		<group name="Gesellschaft" >
+			<talent type="base" name="Menschenkenntnis" test="KL/IN/CH" value="0" />
+			<talent type="base" name="Überreden" test="MU/IN/CH" value="0" />
+		</group>
+		<group name="Handwerk" >
+			<talent type="base" name="Heilkunde Wunden" test="KL/CH/FF" value="0" />
+			<talent type="base" name="Holzbearbeitung" test="KL/FF/KK" value="0" />
+			<talent type="base" name="Kochen" test="KL/IN/FF" value="0" />
+			<talent type="base" name="Lederbearbeitung" test="KL/FF/FF" value="0" />
+			<talent type="base" name="Malen/Zeichnen" test="KL/IN/FF" value="0" />
+			<talent type="base" name="Schneidern" test="KL/FF/FF" value="0" />
+		</group>
+	</talents>
+	<spells name="Zauber">
+		<group name="Dämonologie" />
+		<group name="Veränderung" />
+		<group name="Illusion" />
+	</spells>
+	<liturgies name="Liturgie">
+		<group name="Praios" />
+		<group name="Phex" />
+		<group name="Boron" />
+	</liturgies>
+	<edit>
+		<attributes>
+			<attribute name="Mut" shortname="MU" value="0" />
+			<attribute name="Klugheit" shortname="KL" value="0" />
+			<attribute name="Körperkraft" shortname="KK" value="0" />
+			<attribute name="Gewandheit" shortname="GE" value="0" />
+			<attribute name="Fingerfertigkeit" shortname="FF" value="0" />
+			<attribute name="Intuition" shortname="IN" value="0" />
+			<attribute name="Konstitution" shortname="KO" value="0" />
+			<attribute name="Charisma" shortname="CH" value="0" />
+			<attribute name="Sozialstatus" shortname="SO" value="0" />
+		</attributes>
+		<breed>
+			<colors name="Haarfarbe">
+			</colors>
+			<colors name="Augenfarbe">
+			</colors>
+			<weight value="0" />
+			<height value="0" />
+		</breed>
+		<culture />
+		<profession />
+		<pros />
+		<contras />
+		<talents>
+			<group name="Kampf" >
+				<talent inc="D" type="base" name="Dolche" value="0" />
+				<talent inc="D" type="base" name="Hiebwaffen" value="0" />
+				<talent inc="C" type="base" name="Raufen" value="0" />
+				<talent inc="D" type="base" name="Ringen" value="0" />
+				<talent inc="D" type="base" name="Säbel"  value="0" />
+			</group>
+			<group inc="D" name="Körper" >
+				<talent inc="D" type="base" name="Athletik" test="GE/KO/KK" value="0" />
+				<talent inc="D" type="base" name="Klettern" test="MU/GE/KK" value="0" />
+				<talent inc="D" type="base" name="Selbstbeherrschung" test="MU/KO/KK" value="0" />
+				<talent inc="D" type="base" name="Körperbeherrschung" test="MU/IN/GE" value="0" />
+				<talent inc="D" type="base" name="Schleichen" test="MU/IN/GE" value="0" />
+				<talent inc="D" type="base" name="Schwimmen" test="GE/KO/KK" value="0" />
+				<talent inc="D" type="base" name="Sich Verstecken" test="MU/IN/GE" value="0" />
+				<talent inc="D" type="base" name="Singen" test="IN/CH/CH(KO)" value="0" />
+				<talent inc="D" type="base" name="Sinnenschärfen" test="KL/IN/IN(FF)" value="0" />
+				<talent inc="D" type="base" name="Tanzen" test="CH/GE/GE" value="0" />
+				<talent inc="D" type="base" name="Zechen" test="IN/KO/KK" value="0" />
+			</group>
+			<group inc="B" name="Natur" >
+				<talent inc="B" type="base" name="Fährtensuchen" test="KL/IN/IN(KO)" value="0" />
+				<talent inc="B" type="base" name="Orientierung" test="KL/IN/IN" value="0" />
+				<talent inc="B" type="base" name="Wildnisleben" test="IN/GE/KO" value="0" />
+			</group>
+			<group name="Wissen" >
+				<talent type="base" name="Rechnen" test="KL/KL/IN" value="0" />
+				<talent type="base" name="Götter/Kulte" test="KL/KL/IN" value="0" />
+				<talent type="base" name="Sagen/Legenden" test="KL/IN/CH" value="0" />
+			</group>
+			<group name="Gesellschaft" >
+				<talent type="base" name="Menschenkenntnis" test="KL/IN/CH" value="0" />
+				<talent type="base" name="Überreden" test="MU/IN/CH" value="0" />
+			</group>
+			<group name="Handwerk" >
+				<talent type="base" name="Heilkunde Wunden" test="KL/CH/FF" value="0" />
+				<talent type="base" name="Holzbearbeitung" test="KL/FF/KK" value="0" />
+				<talent type="base" name="Kochen" test="KL/IN/FF" value="0" />
+				<talent type="base" name="Lederbearbeitung" test="KL/FF/FF" value="0" />
+				<talent type="base" name="Malen/Zeichnen" test="KL/IN/FF" value="0" />
+				<talent type="base" name="Schneidern" test="KL/FF/FF" value="0" />
+			</group>
+		</talents>
+		<specialabilities />
+		<spells />
+		<liturgies/>
+	</edit>
+</hero>
