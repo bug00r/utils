@@ -143,6 +143,12 @@ xml_ctx_t* xml_ctx_new(const xml_source_t *xml_src) {
         state_no = XML_CTX_ERROR; 
     }
     
+    if ( xmlGetLastError() != NULL ) {
+        state_no = XML_CTX_ERROR; 
+        xmlFreeDoc(doc);
+        doc = NULL;
+    }
+
     xml_ctx_t *new_ctx = __xml_ctx_create(xml_src, doc);
     __xml_ctx_set_state_ptr(new_ctx, &state_no, &reason);
 
@@ -166,8 +172,10 @@ xml_ctx_t* xml_ctx_new_file(const char *filename) {
 
     if (xmlGetLastError() != NULL) {
         state_no = XML_CTX_ERROR;
+        xmlFreeDoc(new_ctx->doc);
+        new_ctx->doc = NULL;
     }
-
+    
     __xml_ctx_set_state_ptr(new_ctx, &state_no, &reason);
 
     return new_ctx;
