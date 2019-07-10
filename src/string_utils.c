@@ -31,3 +31,8 @@ char * format_string_va_new(const char * msg, va_list argptr)  {
 bool name_match(const unsigned char *search, const unsigned char *base) {
 	return strcmp((char *)search, (char *)base) == 0;
 }
+
+bool is_not_blank(const char * string) {
+    return (string != NULL && (strlen(string) > 0));
+}
+
