@@ -45,6 +45,7 @@ typedef struct {
 	
 */
 xml_source_t* xml_source_from_resname(archive_resource_t* ar, const char *name);
+xml_source_t* xml_source_from_resname_full(archive_resource_t* ar, const char *path, const char *name, const char *suffix);
 
 /*
 	This function reads an xml source from resource_file object.

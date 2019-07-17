@@ -2,7 +2,7 @@ include ../make_config
 
 CFLAGS+=-std=c11 -Wall -Wpedantic
 
-_SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils
+_SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils
 
 LIBNAME:=utils
 LIBEXT:=a
@@ -13,6 +13,7 @@ OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
 THIRD_PARTY_LIB_DIR=./../_third_/
 INCLUDEDIR+=$(patsubst %,-I$(THIRD_PARTY_LIB_DIR)%,src pcre2_bin/include libarchive_bin/include libxml_bin/include/libxml2 libxslt_bin/include)
+INCLUDEDIR+=-I./../collections/dl_list
 
 THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt iconv
 REGEX_LIBS=pcre2-8
@@ -21,9 +22,9 @@ CFLAGS+=-DPCRE2_STATIC
 
 OS_LIBS=kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 uuid ole32 oleaut32 comctl32 ws2_32
 
-USED_LIBS=$(patsubst %,-l%, utils $(REGEX_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS) )
+USED_LIBS=$(patsubst %,-l%, utils $(REGEX_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS) dl_list )
 
-USED_LIBSDIR=-L./../math/utils/$(BUILDPATH) -L./$(BUILDPATH) -LC:/dev/opt/msys64/mingw64/lib
+USED_LIBSDIR=-L./../collections/dl_list/$(BUILDPATH) -L./../math/utils/$(BUILDPATH) -L./$(BUILDPATH) -LC:/dev/opt/msys64/mingw64/lib
 USED_LIBSDIR+=$(patsubst %,-L$(THIRD_PARTY_LIB_DIR)%,pcre2_bin/lib libarchive_bin/lib libxml_bin/lib libxslt_bin/lib)
 
 #wc -c < filename => if needed for after compression size of bytes
@@ -47,6 +48,10 @@ $(_SRC_FILES):
 test_regex_utils: mkbuilddir 
 	$(CC) $(CFLAGS) ./test/test_regex_utils.c ./src/regex_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_regex_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_regex_utils.exe
+
+test_xslt_utils: mkbuilddir mkzip addzip 
+	$(CC) $(CFLAGS) ./test/test_xslt_utils.c ./src/xslt_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xslt_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(BUILDPATH)test_xslt_utils.exe
 
 test_xml_utils: mkbuilddir mkzip addzip 
 	$(CC) $(CFLAGS) ./test/test_xml_utils.c ./src/xml_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)

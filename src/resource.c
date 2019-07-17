@@ -100,6 +100,7 @@ static resource_search_result_t * __resource_load_resource(archive_resource_t * 
 		struct archive_entry *entry;
 		while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
 		  const unsigned char *pathname = (const unsigned char *)archive_entry_pathname(entry);
+
 		  if ( match_func(pattern, pathname) ) {
 
 			resource_file_t *new_file = __resource_read_entry(a, entry);
