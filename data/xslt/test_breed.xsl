@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<xsl:template match="/">
+
+<xsl:param name="talents" />
+<xsl:param name="text" />
+
+<xsl:template match="/breeds/*">
+  <xsl:value-of select="$text"/> 
+  <xsl:for-each select="document($talents)//group" >
+     Name: <xsl:value-of select="@name"/> 
+  </xsl:for-each>
   <html>
   <body>
     <h2>My breeds</h2>
@@ -11,7 +19,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <th>Artist</th>
       </tr>
       <tr>
-        <td>.</td>
+        <td><xsl:value-of select="@name"/></td>
         <td>.</td>
       </tr>
     </table>

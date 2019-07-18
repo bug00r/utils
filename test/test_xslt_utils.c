@@ -10,6 +10,24 @@
 
 EXTERN_BLOB(zip_resource, 7z);
 
+static xmlDocPtr inmemoryloader(const xmlChar * URI, xmlDictPtr dict, int options, void * ctxt, xsltLoadType type) {
+	xmlDocPtr result = NULL;
+	if (type == XSLT_LOAD_DOCUMENT && URI != NULL && strchr((const char *)URI, '_')) {
+		DEBUG_LOG_ARGS("load my userdata doc: %s\n", (const char *)URI);
+		xsltTransformContextPtr context = (xsltTransformContextPtr)ctxt;
+		result = (xmlDocPtr)context->_private;
+	} else {
+		DEBUG_LOG_ARGS("load regular doc: %s\n", (const char *)URI);
+		result = xsltDocDefaultLoader(URI, dict, options, ctxt, type);
+	}
+
+	if (!result) {
+		result = xmlNewDoc((const xmlChar *)"1.0");
+	}
+
+	return result;
+}
+
 int 
 main() 
 {
@@ -32,26 +50,46 @@ main()
 
 	DEBUG_LOG_ARGS(">>> file type => %s\n", stylesheet->data.resfile->type);
 
+	
+	xml_source_t* talents = xml_source_from_resname(ar, "talents");
+
+	assert(talents != NULL);
+
+	xml_ctx_t *talents_ctx = xml_ctx_new(talents);
+
 	xml_ctx_t *sheet_ctx = xml_ctx_new(stylesheet);
 
 	xslt_ctx_t xslt_ctx;
 	xslt_ctx_init(&xslt_ctx);
 
 	xslt_ctx.xml = input_ctx;
-	xslt_ctx.stylesheet = sheet_ctx;
+	xslt_ctx.stylesheet = xsltParseStylesheetDoc(sheet_ctx->doc);
+	sheet_ctx->doc = NULL; //this is because the free method of xsltFreeStylesheet  frees doc
 
-	do_xslt(&xslt_ctx);
+	const char *params[5] = { "text", "Fucking fancy text man!!!", "talents", (const char *)talents_ctx->doc, NULL };
+	xslt_ctx.text_params = &params[0];
+
+	xmlDocPtr result = do_xslt(&xslt_ctx);
 	xslt_print_err(&xslt_ctx);
+
+	#if debug > 1
+		xmlSaveFileEnc("-", result,"UTF-8");
+	#endif
+
+	xmlFreeDoc(result);
+
 	xslt_ctx_cleanup(&xslt_ctx);
 
 
 	free_xml_ctx(&sheet_ctx);
 	free_xml_ctx(&input_ctx);
+	free_xml_ctx(&talents_ctx);
 
 	assert(sheet_ctx == NULL && input_ctx == NULL);
 
 	xml_source_free(&input);
 	xml_source_free(&stylesheet);
+	xml_source_free(&talents);
 
 	archive_resource_free(&ar);
 

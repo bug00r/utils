@@ -26,13 +26,12 @@ _xslt_print_err(void **data) {
 }
 
 static void _xslt_reset(xslt_ctx_t *ctx) {
-		ctx->output		= NULL;
-		ctx->params		= NULL;
+		ctx->output			= NULL;
+		ctx->text_params	= NULL;
+		ctx->xpath_params	= NULL;
 		ctx->profile	= NULL;
 		ctx->stylesheet = NULL;
-		ctx->userdata	= NULL;
 		ctx->xml		= NULL;
-		ctx->loader		= NULL;
 		ctx->errors		= NULL;
 }
 
@@ -47,6 +46,11 @@ void xslt_ctx_cleanup(xslt_ctx_t *ctx) {
 	if (ctx) {
 		dl_list_each(ctx->errors, _xslt_cleanup_error);
 		dl_list_free(&ctx->errors);
+
+		if (ctx->stylesheet != NULL) {
+			xsltFreeStylesheet(ctx->stylesheet);
+		}
+
 		_xslt_reset(ctx);
 	}
 }
@@ -57,22 +61,20 @@ xmlDocPtr do_xslt(xslt_ctx_t * ctx) {
 	if (ctx) {
 		
 		xmlDocPtr input_doc = ctx->xml->doc;
-		xmlDocPtr xslt_doc = ctx->stylesheet->doc;
 
-		if ( input_doc && xslt_doc ) {
+		if ( input_doc && ctx->stylesheet ) {
 
-			xsltStylesheetPtr stylesheet = 	xsltParseStylesheetDoc(xslt_doc);
-			xsltTransformContextPtr xslt_ctx = xsltNewTransformContext(stylesheet, input_doc);
-
-			xslt_ctx->_private = ctx->userdata;
-
+			xsltTransformContextPtr xslt_ctx = xsltNewTransformContext(ctx->stylesheet, input_doc);
+			
 			xsltSetTransformErrorFunc(xslt_ctx, ctx->errors, _xslt_add_error_to_list);
 
-			xsltSetLoaderFunc(ctx->loader);
+			xsltQuoteUserParams(xslt_ctx, ctx->text_params);
+			xsltEvalUserParams(xslt_ctx, ctx->xpath_params);
+			result = xsltApplyStylesheetUser(ctx->stylesheet, input_doc, NULL /*ctx->params */, ctx->output, ctx->profile, xslt_ctx);
 
-			result = xsltApplyStylesheetUser(stylesheet, input_doc, ctx->params, ctx->output, ctx->profile, xslt_ctx);
-
-			xsltSetLoaderFunc(NULL);
+			xsltFreeTransformContext(xslt_ctx);
+			
+			xsltCleanupGlobals();
 		}
 
 	}
