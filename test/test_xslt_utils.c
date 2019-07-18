@@ -10,24 +10,6 @@
 
 EXTERN_BLOB(zip_resource, 7z);
 
-static xmlDocPtr inmemoryloader(const xmlChar * URI, xmlDictPtr dict, int options, void * ctxt, xsltLoadType type) {
-	xmlDocPtr result = NULL;
-	if (type == XSLT_LOAD_DOCUMENT && URI != NULL && strchr((const char *)URI, '_')) {
-		DEBUG_LOG_ARGS("load my userdata doc: %s\n", (const char *)URI);
-		xsltTransformContextPtr context = (xsltTransformContextPtr)ctxt;
-		result = (xmlDocPtr)context->_private;
-	} else {
-		DEBUG_LOG_ARGS("load regular doc: %s\n", (const char *)URI);
-		result = xsltDocDefaultLoader(URI, dict, options, ctxt, type);
-	}
-
-	if (!result) {
-		result = xmlNewDoc((const xmlChar *)"1.0");
-	}
-
-	return result;
-}
-
 int 
 main() 
 {
