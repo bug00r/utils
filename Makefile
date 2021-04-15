@@ -52,9 +52,9 @@ LIB_TARGET:=$(BUILDPATH)$(LIB)
 OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
 INCLUDE?=-I/c/dev/include
-LIBS?=-L/c/dev/lib -L/c/dev/opt/msys2_64/mingw64/lib
+LIBS?=-L/c/dev/lib
 
-#THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt iconv
+
 THIRD_PARTY_LIBS=exslt xslt xml2 archive lzma z iconv
 REGEX_LIBS=pcre2-8
 #this c flags is used by regex lib
