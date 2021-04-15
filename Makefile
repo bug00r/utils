@@ -1,4 +1,44 @@
-include ../make_config
+MAKE?=mingw32-make
+AR?=ar
+ARFLAGS?=rcs
+PATHSEP?=/
+CC=gcc
+BUILDROOT?=build
+
+ifeq ($(CLANG),1)
+	export CC=clang
+endif
+
+BUILDDIR?=$(BUILDROOT)$(PATHSEP)$(CC)
+BUILDPATH?=$(BUILDDIR)$(PATHSEP)
+
+INSTALL_ROOT?=$(BUILDPATH)
+
+ifeq ($(DEBUG),1)
+	export debug=-ggdb -Ddebug=1
+	export isdebug=1
+endif
+
+ifeq ($(ANALYSIS),1)
+	export analysis=-Danalysis=1
+	export isanalysis=1
+endif
+
+ifeq ($(DEBUG),2)
+	export debug=-ggdb -Ddebug=2
+	export isdebug=1
+endif
+
+ifeq ($(DEBUG),3)
+	export debug=-ggdb -Ddebug=3
+	export isdebug=1
+endif
+
+ifeq ($(OUTPUT),1)
+	export outimg= -Doutput=1
+endif
+
+#-ggdb -O1
 
 CFLAGS+=-std=c11 -Wall -Wpedantic
 
@@ -11,11 +51,11 @@ LIB_TARGET:=$(BUILDPATH)$(LIB)
 
 OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
-THIRD_PARTY_LIB_DIR=./../_third_/
-INCLUDEDIR+=$(patsubst %,-I$(THIRD_PARTY_LIB_DIR)%,src pcre2_bin/include libarchive_bin/include libxml_bin/include/libxml2 libxslt_bin/include)
-INCLUDEDIR+=-I./../collections/dl_list
+INCLUDE?=-I/c/dev/include
+LIBS?=-L/c/dev/lib -L/c/dev/opt/msys2_64/mingw64/lib
 
-THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt iconv
+#THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt iconv
+THIRD_PARTY_LIBS=exslt xslt xml2 archive lzma z iconv
 REGEX_LIBS=pcre2-8
 #this c flags is used by regex lib
 CFLAGS+=-DPCRE2_STATIC
@@ -23,9 +63,6 @@ CFLAGS+=-DPCRE2_STATIC
 OS_LIBS=kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 uuid ole32 oleaut32 comctl32 ws2_32
 
 USED_LIBS=$(patsubst %,-l%, utils $(REGEX_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS) dl_list )
-
-USED_LIBSDIR=-L./../collections/dl_list/$(BUILDPATH) -L./../math/utils/$(BUILDPATH) -L./$(BUILDPATH) -LC:/dev/opt/msys64/mingw64/lib
-USED_LIBSDIR+=$(patsubst %,-L$(THIRD_PARTY_LIB_DIR)%,pcre2_bin/lib libarchive_bin/lib libxml_bin/lib libxslt_bin/lib)
 
 #wc -c < filename => if needed for after compression size of bytes
 RES=zip_resource
@@ -43,26 +80,26 @@ $(LIB_TARGET): $(_SRC_FILES)
 	$(AR) $(ARFLAGS) $(LIB_TARGET) $(OBJS)
 
 $(_SRC_FILES):
-	$(CC) $(CFLAGS) -c src/$@.c -o $(BUILDPATH)$@.o $(INCLUDEDIR) $(debug)
+	$(CC) $(CFLAGS) -c src/$@.c -o $(BUILDPATH)$@.o $(INCLUDE) $(debug)
 
 test_regex_utils: mkbuilddir 
-	$(CC) $(CFLAGS) ./test/test_regex_utils.c ./src/regex_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_regex_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(CC) $(CFLAGS) ./test/test_regex_utils.c ./src/regex_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_regex_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_regex_utils.exe
 
 test_xslt_utils: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xslt_utils.c ./src/xslt_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xslt_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(CC) $(CFLAGS) ./test/test_xslt_utils.c ./src/xslt_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xslt_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_xslt_utils.exe
 
 test_xml_utils: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xml_utils.c ./src/xml_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_utils.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(CC) $(CFLAGS) ./test/test_xml_utils.c ./src/xml_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_xml_utils.exe
 
 test_xml_source: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xml_source.c ./src/xml_source.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_source.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(CC) $(CFLAGS) ./test/test_xml_source.c ./src/xml_source.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_source.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_xml_source.exe
 
 test_resource: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_resource.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)test_resource.exe -I./src/ $(INCLUDEDIR) $(USED_LIBSDIR) -static $(USED_LIBS) $(debug)
+	$(CC) $(CFLAGS) ./test/test_resource.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)test_resource.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_resource.exe
 
 .PHONY: clean mkbuilddir mkzip addzip
@@ -79,3 +116,18 @@ mkbuilddir:
 	
 clean:
 	-rm -dr $(BUILDROOT)
+
+install:
+	mkdir -p $(INSTALL_ROOT)include
+	mkdir -p $(INSTALL_ROOT)lib
+	cp ./src/defs.h $(INSTALL_ROOT)include/defs.h
+	cp ./src/file_path_utils.h $(INSTALL_ROOT)include/file_path_utils.h
+	cp ./src/number_utils.h $(INSTALL_ROOT)include/number_utils.h
+	cp ./src/regex_utils.h $(INSTALL_ROOT)include/regex_utils.h
+	cp ./src/resource.h $(INSTALL_ROOT)include/resource.h
+	cp ./src/string_utils.h $(INSTALL_ROOT)include/string_utils.h
+	cp ./src/xml_source.h $(INSTALL_ROOT)include/xml_source.h
+	cp ./src/xml_utils.h $(INSTALL_ROOT)include/xml_utils.h
+	cp ./src/xpath_utils.h $(INSTALL_ROOT)include/xpath_utils.h
+	cp ./src/xslt_utils.h $(INSTALL_ROOT)include/xslt_utils.h
+	cp $(BUILDPATH)$(LIB) $(INSTALL_ROOT)lib/$(LIB)
