@@ -40,7 +40,15 @@ endif
 
 #-ggdb -O1
 
-CFLAGS+=-std=c11 -Wall -Wpedantic
+
+BIT_SUFFIX=
+
+ifeq ($(M32),1)
+	CFLAGS+=-m32
+	BIT_SUFFIX+=32
+endif
+
+CFLAGS+=-std=c11 -Wpedantic -Wall -Wextra
 
 _SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils
 
@@ -52,7 +60,7 @@ LIB_TARGET:=$(BUILDPATH)$(LIB)
 OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
 INCLUDE?=-I/c/dev/include
-LIBS?=-L/c/dev/lib
+LIBS?=-L/c/dev/lib$(BIT_SUFFIX)
 
 
 THIRD_PARTY_LIBS=exslt xslt xml2 archive lzma z iconv
@@ -119,7 +127,7 @@ clean:
 
 install:
 	mkdir -p $(INSTALL_ROOT)include
-	mkdir -p $(INSTALL_ROOT)lib
+	mkdir -p $(INSTALL_ROOT)lib$(BIT_SUFFIX)
 	cp ./src/defs.h $(INSTALL_ROOT)include/defs.h
 	cp ./src/file_path_utils.h $(INSTALL_ROOT)include/file_path_utils.h
 	cp ./src/number_utils.h $(INSTALL_ROOT)include/number_utils.h
@@ -130,4 +138,4 @@ install:
 	cp ./src/xml_utils.h $(INSTALL_ROOT)include/xml_utils.h
 	cp ./src/xpath_utils.h $(INSTALL_ROOT)include/xpath_utils.h
 	cp ./src/xslt_utils.h $(INSTALL_ROOT)include/xslt_utils.h
-	cp $(BUILDPATH)$(LIB) $(INSTALL_ROOT)lib/$(LIB)
+	cp $(BUILDPATH)$(LIB) $(INSTALL_ROOT)lib$(BIT_SUFFIX)/$(LIB)
