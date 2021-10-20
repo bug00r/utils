@@ -48,7 +48,7 @@ ifeq ($(M32),1)
 	BIT_SUFFIX+=32
 endif
 
-CFLAGS+=-std=c11 -Wpedantic -Wall -Wextra
+CFLAGS+=-std=c11 -Wpedantic -Wall -Wextra -DIN_LIBXML
 
 _SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils
 
