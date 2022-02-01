@@ -1,9 +1,7 @@
 #include "xml_utils.h"
 
-
-
 static xml_ctx_t* __xml_ctx_create(const xml_source_t *xml_src, xmlDocPtr doc) {
-    xml_ctx_t temp = {xml_src, doc};
+    xml_ctx_t temp = {xml_src, doc, {XML_CTX_SUCCESS, XML_CTX_NO_REASON}};
     xml_ctx_t * new_ctx = malloc(sizeof(xml_ctx_t));
     memcpy(new_ctx, &temp, sizeof(xml_ctx_t));
     return new_ctx;

@@ -24,6 +24,8 @@ void regexmatch_xpath_func(xmlXPathParserContextPtr ctxt, int nargs) {
 
 void max_xpath_func(xmlXPathParserContextPtr ctxt, int nargs) {
 
+	(void)(nargs);
+
 	xmlNodeSetPtr nodes = xmlXPathPopNodeSet(ctxt);
 	
 	if (xmlXPathCheckError(ctxt)) {

@@ -70,7 +70,7 @@ bool regex_range_match(const unsigned char *range, const unsigned char *value) {
 
 	int rc;
 
-	pcre2_match_data *match_data = _regex_match_("^(\\d+)$|^((\\d+)-(\\d+))$", range, &rc);
+	pcre2_match_data *match_data = _regex_match_((const unsigned char *)"^(\\d+)$|^((\\d+)-(\\d+))$", range, &rc);
 
 	if (rc > 0) {
 		

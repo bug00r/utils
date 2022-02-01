@@ -27,13 +27,13 @@
 
 #include "xml_source.h"
 
-typedef enum {
+typedef enum _xml_ctx_state_no {
     XML_CTX_SUCCESS,    /* operation was successfully */
     XML_CTX_ERROR,      /* operation causes error */
     XML_CTX_NO_STATE    /* operation does not set state because without a reson */
 } xml_ctx_state_no_t;
 
-typedef enum {
+typedef enum _xml_ctx_state_reason {
     XML_CTX_NO_REASON,          /* reason for no reason oO */
     XML_CTX_READ_AND_PARSE,     /* reason for missing or invalid source: null pointer oder src size = 0 */
     XML_CTX_SRC_INVALID,        /* for src context is invalid, like missing src or doc pointer */
