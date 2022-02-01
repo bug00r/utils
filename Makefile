@@ -48,7 +48,7 @@ ifeq ($(M32),1)
 	BIT_SUFFIX+=32
 endif
 
-CFLAGS+=-std=c11 -Wpedantic -Wall -Wextra -DIN_LIBXML $(debug)
+CFLAGS+=-std=c11 -DIN_LIBXML -DLIBXML_STATIC -Wpedantic -Wall -Wextra $(debug)
 
 _SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils
 
@@ -60,10 +60,10 @@ LIB_TARGET:=$(BUILDPATH)$(LIB)
 OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
 INCLUDE?=-I/c/dev/include
-LIBS?=-L/c/dev/lib$(BIT_SUFFIX)
+LIBS?=-L/c/dev/lib$(BIT_SUFFIX) -L./$(BUILDPATH)
 
 
-THIRD_PARTY_LIBS=exslt xslt xml2 archive lzma z iconv
+THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt zstd iconv
 REGEX_LIBS=pcre2-8
 #this c flags is used by regex lib
 CFLAGS+=-DPCRE2_STATIC
@@ -110,8 +110,10 @@ test_resource: mkbuilddir mkzip addzip
 	$(CC) $(CFLAGS) ./test/test_resource.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)test_resource.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_resource.exe
 
-.PHONY: clean mkbuilddir mkzip addzip
-	
+.PHONY: clean mkbuilddir mkzip addzip test 
+
+test: test_regex_utils test_xslt_utils test_xml_utils test_xml_source test_resource
+
 addzip:
 	cd $(BUILDPATH); \
 	ld -r -b binary $(RES_7Z) -o $(RES_O)
