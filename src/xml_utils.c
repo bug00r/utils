@@ -160,15 +160,19 @@ xml_ctx_t* xml_ctx_new_node(const xmlNodePtr rootnode) {
     return new_ctx;
 }
 
-xml_ctx_t* xml_ctx_new_file(const char *filename) {
+xml_ctx_t* xml_ctx_new_file(const char *filename) 
+{
     xml_ctx_t *new_ctx = xml_ctx_new_empty();
     
-    new_ctx->doc = xmlReadFile(filename, "UTF-8", 0);
-
     xml_ctx_state_no_t state_no = XML_CTX_SUCCESS; 
     xml_ctx_state_reason_t reason = XML_CTX_READ_AND_PARSE;
 
-    if (xmlGetLastError() != NULL) {
+    if (u_file_exists(filename) && (xmlGetLastError() == NULL))
+    {
+        new_ctx->doc = xmlReadFile(filename, "UTF-8", 0);
+    }
+    else 
+    {
         state_no = XML_CTX_ERROR;
         xmlFreeDoc(new_ctx->doc);
         new_ctx->doc = NULL;
@@ -180,22 +184,26 @@ xml_ctx_t* xml_ctx_new_file(const char *filename) {
 }
 
 void xml_ctx_save_file(const xml_ctx_t *ctx, const char *filename) {
-    
+
+    xml_ctx_state_no_t state_no = XML_CTX_SUCCESS; 
+    xml_ctx_state_reason_t reason = XML_CTX_READ_AND_PARSE; 
+
     if (ctx != NULL && ctx->doc != NULL && filename != NULL && ( strlen(filename) > 0 )) {
 
         if ( xmlSaveFileEnc(filename, ctx->doc, "UTF-8") == -1 ) {
             
-            xml_ctx_state_no_t state_no = XML_CTX_SUCCESS; 
-            xml_ctx_state_reason_t reason = XML_CTX_READ_AND_PARSE; 
+            xmlErrorPtr	err = xmlGetLastError();
 
-            if (xmlGetLastError() != NULL) {
+            if (err != NULL) {
                 state_no = XML_CTX_ERROR;
+                printf("XML save error: %s: %s\n%s\n%s\n", err->message, err->str1,err->str2, err->str1);
             }
-
-            __xml_ctx_set_state_ptr((xml_ctx_t *)ctx, &state_no, &reason);
+            
         }
 
     }
+
+    __xml_ctx_set_state_ptr((xml_ctx_t *)ctx, &state_no, &reason);
 
 }
 

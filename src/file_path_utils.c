@@ -54,3 +54,14 @@ char * name_from_filename(const char * file_name) {
 	name[count] = '\0';
 	return name;
 }
+
+int u_file_exists(const char* file_name)
+{
+	FILE *file;
+    if ((file = fopen(file_name, "r")))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
