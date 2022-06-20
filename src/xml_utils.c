@@ -480,7 +480,7 @@ bool xml_ctx_exist_format(xml_ctx_t *ctx, const char *xpath_format, ...) {
 }
 
 bool xml_xpath_has_result(xmlXPathObjectPtr xpathobj) {
-    return ( xpathobj != NULL && xpathobj->nodesetval && (xpathobj->nodesetval->nodeNr > 0 ));
+    return ( xpathobj != NULL && xpathobj->type == XPATH_NODESET && xpathobj->nodesetval && (xpathobj->nodesetval->nodeNr > 0 ));
 }
 
 void xml_ctx_set_attr_str_xpath(xml_ctx_t *ctx, const unsigned char *value, const char *xpath) {
@@ -571,3 +571,73 @@ xmlChar * xml_ctx_get_attr_format(xml_ctx_t *ctx, const unsigned char *attr_name
 
     return value;
 }
+
+//The FOLLOWING IS UNTESTED AND INCOMPLETE
+
+int xml_ctx_strtol(xmlChar *str, long *result)
+{
+    int parseError = 0;
+    char *end;
+
+    *result = strtol((const char*)str, &end, 10);
+    
+    if (errno == ERANGE){
+        errno = 0;
+        parseError = 1;
+    }
+    
+    return parseError;
+}
+
+int xml_ctx_strtof(xmlChar *str, float *result)
+{
+    int parseError = 0;
+    char *end;
+
+    *result = strtof((const char*)str, &end);
+    
+    if (errno == ERANGE){
+        errno = 0;
+        parseError = 1;
+    }
+    
+    return parseError;
+}
+
+int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath)
+{
+    if ( ctx != NULL )
+    {
+        xmlXPathObjectPtr found = xml_ctx_xpath(ctx, xpath);
+    }
+
+    return 0;
+}
+
+int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...)
+{
+    if ( ctx != NULL )
+    {
+        va_list args;
+        va_start(args, xpath_format);
+
+        xmlXPathObjectPtr found = xml_ctx_xpath_format_va(ctx, xpath_format, args);
+
+        va_end(args);
+    }
+
+    return 0;
+}
+
+int xml_ctx_xpath_tof(xml_ctx_t *ctx, long *result, const char *xpath)
+{
+    return 0;
+}
+
+int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...)
+{
+    return 0;
+}
+
+
+

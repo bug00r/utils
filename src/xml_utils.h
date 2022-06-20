@@ -18,6 +18,8 @@
         
 #endif
 
+#include <stdlib.h>
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -256,5 +258,21 @@ void xml_ctx_set_content_xpath_format(xml_ctx_t *ctx, const unsigned char *value
 
 xmlChar * xml_ctx_get_attr(xml_ctx_t *ctx, const unsigned char *attr_name, const char *xpath);
 xmlChar * xml_ctx_get_attr_format(xml_ctx_t *ctx, const unsigned char *attr_name, const char *xpath_format, ...);
+
+/* 
+    This functions converts xpath target to different number types. 
+    Each of them will store the result the result pointer targets
+
+    returns 0 if parsing was ok, otherwise -1
+
+
+    The FOLLOWING IS UNTESTED AND INCOMPLETE
+ */
+int xml_ctx_strtof(xmlChar *str, float *result);
+int xml_ctx_strtol(xmlChar *str, long *result);
+int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath);
+int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
+int xml_ctx_xpath_tof(xml_ctx_t *ctx, long *result, const char *xpath);
+int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
 
 #endif
