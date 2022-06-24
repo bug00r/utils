@@ -454,15 +454,6 @@ static void test_xml_ctx_xmlstr_to_long()
 	DEBUG_LOG("<<<\n");
 }
 
-/*
-int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath);
-int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpath_format, va_list argsPtr);
-int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath);
-int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
-int xml_ctx_xpath_tof(xml_ctx_t *ctx, float *result, const char *xpath);
-int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, float *result, const char *xpath_format, ...);
-*/
-
 static void test_xml_ctx_xpath_to_double()
 {
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
@@ -481,6 +472,14 @@ static void test_xml_ctx_xpath_to_double()
 
 	assert(errNo == 0);
 	assert(dResult == 20.0);
+
+	errNo = xml_ctx_xpath_tod(nCtx, &dResult, "sum(//hero/attributes/attribute/@value)");
+
+	assert(errNo == 0);
+	assert(dResult == 64.0);
+
+	errNo = xml_ctx_xpath_tod(nCtx, &dResult, "//hero/attributes/attribute");
+	assert(errNo == 1);
 
 	free_xml_ctx_src(&nCtx);
 	archive_resource_free(&ar);
@@ -507,6 +506,14 @@ static void test_xml_ctx_xpath_to_long()
 	assert(errNo == 0);
 	assert(lResult == 20);
 
+	errNo = xml_ctx_xpath_tol(nCtx, &lResult, "sum(//hero/attributes/attribute/@value)");
+
+	assert(errNo == 0);
+	assert(lResult == 64);
+
+	errNo = xml_ctx_xpath_tol(nCtx, &lResult, "//hero/attributes/attribute");
+	assert(errNo == 1);
+
 	free_xml_ctx_src(&nCtx);
 	archive_resource_free(&ar);
 
@@ -532,6 +539,14 @@ static void test_xml_ctx_xpath_to_float()
 
 	assert(errNo == 0);
 	assert(fResult == 20.f);
+
+	errNo = xml_ctx_xpath_tof(nCtx, &fResult, "sum(//hero/attributes/attribute/@value)");
+
+	assert(errNo == 0);
+	assert(fResult == 64.f);
+
+	errNo = xml_ctx_xpath_tof(nCtx, &fResult, "//hero/attributes/attribute");
+	assert(errNo == 1);
 
 	free_xml_ctx_src(&nCtx);
 	archive_resource_free(&ar);

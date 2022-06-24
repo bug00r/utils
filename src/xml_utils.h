@@ -19,7 +19,7 @@
 #endif
 
 #include <stdlib.h>
-
+#include <math.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>

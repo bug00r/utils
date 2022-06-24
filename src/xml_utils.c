@@ -611,10 +611,10 @@ int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath)
     {
         xmlXPathObjectPtr found = xml_ctx_xpath(ctx, xpath);
 
-        if (xml_xpath_has_result(found))
+        if ( found && ( xml_xpath_has_result(found) || found->type == XPATH_NUMBER))
         {
             *result = xmlXPathCastToNumber(found);
-            errNo = 0;
+            errNo = ( isnan(*result) ? 1 : 0);
         }
 
         xmlXPathFreeObject(found);
@@ -630,10 +630,10 @@ int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpat
     {
         xmlXPathObjectPtr found = xml_ctx_xpath_format_va(ctx, xpath_format, args);
 
-        if (xml_xpath_has_result(found))
+        if ( found && ( xml_xpath_has_result(found) || found->type == XPATH_NUMBER))
         {
             *result = xmlXPathCastToNumber(found);
-            errNo = 0;
+            errNo = ( isnan(*result) ? 1 : 0);
         }
 
         xmlXPathFreeObject(found);
