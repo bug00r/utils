@@ -604,39 +604,106 @@ int xml_ctx_strtof(xmlChar *str, float *result)
     return parseError;
 }
 
-int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath)
+int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath)
 {
+    int errNo = 1;
     if ( ctx != NULL )
     {
         xmlXPathObjectPtr found = xml_ctx_xpath(ctx, xpath);
+
+        if (xml_xpath_has_result(found))
+        {
+            *result = xmlXPathCastToNumber(found);
+            errNo = 0;
+        }
+
+        xmlXPathFreeObject(found);
+    } 
+
+    return errNo;
+}
+
+int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpath_format, va_list args)
+{
+    int errNo = 1;
+    if ( ctx != NULL )
+    {
+        xmlXPathObjectPtr found = xml_ctx_xpath_format_va(ctx, xpath_format, args);
+
+        if (xml_xpath_has_result(found))
+        {
+            *result = xmlXPathCastToNumber(found);
+            errNo = 0;
+        }
+
+        xmlXPathFreeObject(found);
+    } 
+
+    return errNo;
+}
+
+int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath)
+{
+    double dResult;
+    int errNo = xml_ctx_xpath_tod(ctx, &dResult, xpath);
+
+    if ( errNo == 0 )
+    {
+        *result = (long)dResult;
     }
 
-    return 0;
+    return errNo;
 }
 
 int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...)
 {
-    if ( ctx != NULL )
+    double dResult;
+
+    va_list args;
+    va_start(args, xpath_format);
+
+    int errNo = xml_ctx_xpath_tod_format_va(ctx, &dResult, xpath_format, args);
+
+    va_end(args);
+
+    if ( errNo == 0 )
     {
-        va_list args;
-        va_start(args, xpath_format);
-
-        xmlXPathObjectPtr found = xml_ctx_xpath_format_va(ctx, xpath_format, args);
-
-        va_end(args);
+        *result = (long)dResult;
     }
 
-    return 0;
+    return errNo;
 }
 
-int xml_ctx_xpath_tof(xml_ctx_t *ctx, long *result, const char *xpath)
+int xml_ctx_xpath_tof(xml_ctx_t *ctx, float *result, const char *xpath)
 {
-    return 0;
+    double dResult;
+    int errNo = xml_ctx_xpath_tod(ctx, &dResult, xpath);
+
+    if ( errNo == 0 )
+    {
+        *result = (long)dResult;
+    }
+
+    return errNo;
 }
 
-int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...)
+int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, float *result, const char *xpath_format, ...)
 {
-    return 0;
+    double dResult;
+
+    va_list args;
+    va_start(args, xpath_format);
+
+    int errNo = xml_ctx_xpath_tod_format_va(ctx, &dResult, xpath_format, args);
+
+    va_end(args);
+    
+    if ( errNo == 0 )
+    {
+        *result = (long)dResult;
+    }
+
+    return errNo;
 }
 
 

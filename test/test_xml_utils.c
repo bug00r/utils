@@ -339,7 +339,7 @@ static void test_xml_ctx_add_node_xpath() {
 	DEBUG_LOG("<<<\n");
 }
 
-static void __search_and_dum_range_assert(xml_ctx_t *ctx, unsigned char *xpath, bool assert_val) {
+static void __search_and_dum_range_assert(xml_ctx_t *ctx, const char *xpath, bool assert_val) {
 	
 	xmlXPathObjectPtr colres = xml_ctx_xpath(ctx, xpath);
 
@@ -454,6 +454,91 @@ static void test_xml_ctx_xmlstr_to_long()
 	DEBUG_LOG("<<<\n");
 }
 
+/*
+int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath);
+int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpath_format, va_list argsPtr);
+int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath);
+int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
+int xml_ctx_xpath_tof(xml_ctx_t *ctx, float *result, const char *xpath);
+int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, float *result, const char *xpath_format, ...);
+*/
+
+static void test_xml_ctx_xpath_to_double()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
+	xml_source_t* result = xml_source_from_resname(ar, "basehero");
+	xml_ctx_t *nCtx = xml_ctx_new(result);
+
+	double dResult = 0;
+	int errNo = xml_ctx_xpath_tod(nCtx, &dResult, "//hero/config/base-gp/@value");
+
+	assert(errNo == 0);
+	assert(dResult == 110.0);
+
+	errNo = xml_ctx_xpath_tod(nCtx, &dResult, "//hero/@age");
+
+	assert(errNo == 0);
+	assert(dResult == 20.0);
+
+	free_xml_ctx_src(&nCtx);
+	archive_resource_free(&ar);
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_xml_ctx_xpath_to_long()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
+	xml_source_t* result = xml_source_from_resname(ar, "basehero");
+	xml_ctx_t *nCtx = xml_ctx_new(result);
+
+	long lResult = 0;
+	int errNo = xml_ctx_xpath_tol(nCtx, &lResult, "//hero/config/base-gp/@value");
+
+	assert(errNo == 0);
+	assert(lResult == 110);
+
+	errNo = xml_ctx_xpath_tol(nCtx, &lResult, "//hero/@age");
+
+	assert(errNo == 0);
+	assert(lResult == 20);
+
+	free_xml_ctx_src(&nCtx);
+	archive_resource_free(&ar);
+
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_xml_ctx_xpath_to_float()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
+	xml_source_t* result = xml_source_from_resname(ar, "basehero");
+	xml_ctx_t *nCtx = xml_ctx_new(result);
+
+	float fResult = 0;
+	int errNo = xml_ctx_xpath_tof(nCtx, &fResult, "//hero/config/base-gp/@value");
+
+	assert(errNo == 0);
+	assert(fResult == 110.f);
+
+	errNo = xml_ctx_xpath_tof(nCtx, &fResult, "//hero/@age");
+
+	assert(errNo == 0);
+	assert(fResult == 20.f);
+
+	free_xml_ctx_src(&nCtx);
+	archive_resource_free(&ar);
+
+	DEBUG_LOG("<<<\n");
+}
+
 int 
 main() 
 {
@@ -472,11 +557,19 @@ main()
 
 	test_xml_ctx_xpath_format();
 
+	test_xml_ctx_add_node_xpath();
+
 	test_xml_ctx_xpath_in_range();
 
 	test_xml_ctx_xmlstr_to_float();
 
 	test_xml_ctx_xmlstr_to_long();
+
+	test_xml_ctx_xpath_to_double();
+
+	test_xml_ctx_xpath_to_long();
+
+	test_xml_ctx_xpath_to_float();
 
 	DEBUG_LOG("<< end xml utils tests:\n");
 

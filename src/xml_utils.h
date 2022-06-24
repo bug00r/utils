@@ -271,9 +271,11 @@ int xml_ctx_strtol(xmlChar *str, long *result);
 
     The FOLLOWING IS UNTESTED AND INCOMPLETE
  */
+int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath);
+int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpath_format, va_list argsPtr);
 int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath);
 int xml_ctx_xpath_tol_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
-int xml_ctx_xpath_tof(xml_ctx_t *ctx, long *result, const char *xpath);
-int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, long *result, const char *xpath_format, ...);
+int xml_ctx_xpath_tof(xml_ctx_t *ctx, float *result, const char *xpath);
+int xml_ctx_xpath_tof_format(xml_ctx_t *ctx, float *result, const char *xpath_format, ...);
 
 #endif
