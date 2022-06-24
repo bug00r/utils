@@ -361,7 +361,8 @@ static void __search_and_dum_range_assert(xml_ctx_t *ctx, unsigned char *xpath, 
 	xmlXPathFreeObject(colres);
 }
 
-static void test_xml_ctx_xpath_in_range() {
+static void test_xml_ctx_xpath_in_range() 
+{
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
 	
 	archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
@@ -380,6 +381,78 @@ static void test_xml_ctx_xpath_in_range() {
 	DEBUG_LOG("<<<\n");
 }
 
+/*
+int xml_ctx_strtof(xmlChar *str, float *result);
+int xml_ctx_strtol(xmlChar *str, long *result);
+*/
+
+static void test_xml_ctx_xmlstr_to_float()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	xmlChar * val =(xmlChar*)"3.41";
+	float result = .0f;
+	int err = xml_ctx_strtof(val, &result);
+
+	assert(err == 0);
+	assert(result == 3.41f);
+
+	xmlChar * val2 = (xmlChar*)"ABCD";
+	result = .0f;
+	err = xml_ctx_strtof(val2, &result);
+
+	assert(err == 0);
+	assert(result == 0.f);
+
+	xmlChar * val3 = (xmlChar*)"-3.4133";
+	result = .0f;
+	err = xml_ctx_strtof(val3, &result);
+
+	assert(err == 0);
+	assert(result == -3.4133f);
+
+	xmlChar * val4 = (xmlChar*)"33333333333333333333333333333333333333333333333333333333333333333333333333333333.4133";
+	result = .0f;
+	err = xml_ctx_strtof(val4, &result);
+
+	assert(err == 1);
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_xml_ctx_xmlstr_to_long()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	xmlChar * val = (xmlChar*)"341";
+	long result = 0;
+	int err = xml_ctx_strtol(val, &result);
+
+	assert(err == 0);
+	assert(result == 341);
+
+	xmlChar * val2 = (xmlChar*)"ABCD";
+	result = 0;
+	err = xml_ctx_strtol(val2, &result);
+
+	assert(err == 0);
+	assert(result == 0);
+
+	xmlChar * val3 = (xmlChar*)"-34133";
+	result = 0;
+	err = xml_ctx_strtol(val3, &result);
+
+	assert(err == 0);
+	assert(result == -34133);
+
+	xmlChar * val4 = (xmlChar*)"33333333333333333333333333333333333333333333333333333333333333333333333333333333";
+	result = 0;
+	err = xml_ctx_strtol(val4, &result);
+
+	assert(err == 1);
+
+	DEBUG_LOG("<<<\n");
+}
 
 int 
 main() 
@@ -400,6 +473,10 @@ main()
 	test_xml_ctx_xpath_format();
 
 	test_xml_ctx_xpath_in_range();
+
+	test_xml_ctx_xmlstr_to_float();
+
+	test_xml_ctx_xmlstr_to_long();
 
 	DEBUG_LOG("<< end xml utils tests:\n");
 
