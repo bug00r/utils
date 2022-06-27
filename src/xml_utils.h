@@ -262,15 +262,6 @@ xmlChar * xml_ctx_get_attr_format(xml_ctx_t *ctx, const unsigned char *attr_name
 int xml_ctx_strtof(xmlChar *str, float *result);
 int xml_ctx_strtol(xmlChar *str, long *result);
 
-/* 
-    This functions converts xpath target to different number types. 
-    Each of them will store the result the result pointer targets
-
-    returns 0 if parsing was ok, otherwise -1
-
-
-    The FOLLOWING IS UNTESTED AND INCOMPLETE
- */
 int xml_ctx_xpath_tod(xml_ctx_t *ctx, double *result, const char *xpath);
 int xml_ctx_xpath_tod_format_va(xml_ctx_t *ctx, double *result, const char *xpath_format, va_list argsPtr);
 int xml_ctx_xpath_tol(xml_ctx_t *ctx, long *result, const char *xpath);
