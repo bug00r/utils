@@ -50,7 +50,7 @@ endif
 
 CFLAGS+=-std=c11 -DIN_LIBXML -DLIBXML_STATIC -Wpedantic -Wall -Wextra $(debug)
 
-_SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils
+_SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils byte_utils
 
 LIBNAME:=utils
 LIBEXT:=a
@@ -110,9 +110,13 @@ test_resource: mkbuilddir mkzip addzip
 	$(CC) $(CFLAGS) ./test/test_resource.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)test_resource.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
 	$(BUILDPATH)test_resource.exe
 
+test_byte_utils: mkbuilddir mkzip addzip 
+	$(CC) $(CFLAGS) ./test/test_byte_utils.c ./src/byte_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_byte_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
+	$(BUILDPATH)test_byte_utils.exe
+
 .PHONY: clean mkbuilddir mkzip addzip test 
 
-test: test_regex_utils test_xslt_utils test_xml_utils test_xml_source test_resource
+test: test_regex_utils test_xslt_utils test_xml_utils test_xml_source test_resource test_byte_utils
 
 addzip:
 	cd $(BUILDPATH); \
@@ -140,4 +144,5 @@ install:
 	cp ./src/xml_utils.h $(INSTALL_ROOT)include/xml_utils.h
 	cp ./src/xpath_utils.h $(INSTALL_ROOT)include/xpath_utils.h
 	cp ./src/xslt_utils.h $(INSTALL_ROOT)include/xslt_utils.h
+	cp ./src/byte_utils.h $(INSTALL_ROOT)include/byte_utils.h
 	cp $(BUILDPATH)$(LIB) $(INSTALL_ROOT)lib$(BIT_SUFFIX)/$(LIB)
