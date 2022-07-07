@@ -714,6 +714,45 @@ static void test_bb_replace_byte()
 	DEBUG_LOG("<<<\n");
 }
 
+static void test_bb_replace_bytes()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+
+	unsigned char bytes1[10] = "0123456789";
+	size_t cntBytes1 = 10;
+	unsigned char bytes2[5] = "VWXYZ";
+	size_t cntBytes2 = 5;
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+
+	byte_buffer_append_bytes(&buffer, &bytes1[0], cntBytes1);
+
+	byte_buffer_replace_bytes(&buffer, 3, &bytes2[0], cntBytes2);
+
+	byte_buffer_append_bytes(&buffer, "CCC", 3);
+
+	#ifdef debug
+	printf("REPLACE bytes:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	unsigned char replacedBytes[20] = "012VWXYZ89CCCAAAAAAA";
+
+	for (size_t curByte = 0; curByte < buffer.size; curByte++)
+	{	
+		assert(buffer.buffer[curByte] == replacedBytes[curByte]);
+	}
+	
+	DEBUG_LOG("<<<\n");
+}
+
 static void test_bb_dummy()
 {
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
@@ -746,6 +785,8 @@ int main(int argc, char **argv) {
 	test_bb_append_bytes_ring();
 
 	test_bb_replace_byte();
+
+	test_bb_replace_bytes();
 
 	DEBUG_LOG("<< end byte utils test:\n");
 

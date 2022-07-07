@@ -219,7 +219,16 @@ void byte_buffer_replace_byte(byte_buffer_t* _buffer, size_t index, unsigned cha
 
 void byte_buffer_replace_bytes(byte_buffer_t* _buffer, size_t index, unsigned char* bytes, size_t cntBytes)
 {
-	assert(("byte_buffer_replace_bytes: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		byte_buffer_append_bytes(buffer, bytes, cntBytes);
+		
+		buffer->offset = oldOffset;
+	}
 }
 
 
