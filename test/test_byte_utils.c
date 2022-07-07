@@ -597,7 +597,7 @@ static void test_bb_append_bytes_skip()
 	}
 
 	#ifdef debug
-	printf("Bytes 0-9A-J:");
+	printf("Bytes 0-9A-F:");
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
 
@@ -631,6 +631,8 @@ int main(int argc, char **argv) {
 	test_bb_append_byte();
 
 	test_bb_append_bytes_trunc();
+	
+	test_bb_append_bytes_skip();
 
 	DEBUG_LOG("<< end byte utils test:\n");
 

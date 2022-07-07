@@ -161,6 +161,9 @@ static void __byte_buffer_append_bytes_trunc(byte_buffer_t* _buffer, unsigned ch
 static void __byte_buffer_append_bytes_skip(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
 {
 	byte_buffer_t* buffer = _buffer;
+	if ( (buffer->offset + cntBytes) >= buffer->size ) return;
+
+	__byte_buffer_append_bytes_trunc(buffer, bytes, cntBytes);
 }
 
 static void __byte_buffer_append_bytes_ring(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
