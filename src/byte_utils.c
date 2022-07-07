@@ -1,27 +1,85 @@
 #include "byte_utils.h"
 
 //Took outside buffer to work on it
-void byte_buffer_init(byte_buffer_t* buffer, 
+void byte_buffer_init(byte_buffer_t* _buffer, 
                       byte_buffer_mode_t mode, 
                       unsigned char* rawBuffer, 
                       size_t rawBuffSize)
 {
-	assert(("byte_buffer_init: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		buffer->alloc = false;
+		buffer->mode = mode;
+		buffer->offset = 0;
+		buffer->size = rawBuffSize;
+		buffer->buffer = rawBuffer;
+	}
 }
 
 
 //Handles internal memory allocation
-void byte_buffer_init_new(byte_buffer_t* buffer, 
+void byte_buffer_init_new(byte_buffer_t* _buffer, 
                           byte_buffer_mode_t mode, 
                           size_t rawBuffSize)
 {
-	assert(("byte_buffer_init_new: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		buffer->alloc = true;
+		buffer->mode = mode;
+		buffer->offset = 0;
+		buffer->size = rawBuffSize;
+		buffer->buffer = malloc(rawBuffSize * sizeof(unsigned char));
+	}
 }
 
 
-void byte_buffer_free(byte_buffer_t* buffer)
+void byte_buffer_free(byte_buffer_t* _buffer)
 {
-	assert(( "byte_buffer_free: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		if (buffer->alloc)
+		{
+			free(buffer->buffer);
+		}
+		buffer->buffer = NULL;
+		buffer->size = 0;
+		buffer->offset = 0;
+	}
+}
+
+//fills the complete buffer with fillbyte
+void byte_buffer_fill_complete(byte_buffer_t* _buffer, unsigned char fillByte)
+{
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		memset(buffer->buffer, fillByte, buffer->size);
+	}
+}
+
+//fills the buffer from given index to the end
+void byte_buffer_fill_to_end(byte_buffer_t* _buffer, size_t index, unsigned char fillByte)
+{
+	byte_buffer_t* buffer = _buffer;
+	if (buffer && index < buffer->size)
+	{
+		memset(buffer->buffer + index, fillByte, buffer->size - index);
+	}
+}
+
+//fills the buffer from start index by range with cnt bytes.
+void byte_buffer_fill_range(byte_buffer_t* _buffer, size_t startIndex, size_t cnt, unsigned char fillByte)
+{
+	byte_buffer_t* buffer = _buffer;
+	if (buffer && startIndex < buffer->size)
+	{
+		size_t alignedCnt = cnt;
+		alignedCnt = ( alignedCnt + startIndex < buffer->size ? cnt : (buffer->size - startIndex));
+		memset(buffer->buffer + startIndex, fillByte, alignedCnt);
+	}
 }
 
 
@@ -29,25 +87,6 @@ void byte_buffer_clear(byte_buffer_t* buffer)
 {
 	assert(("byte_buffer_clear: Not Implement YET!!!", false));
 }
-
-//fills the complete buffer with fillbyte
-void byte_buffer_fill_complete(byte_buffer_t* buffer, unsigned char fillByte)
-{
-	assert(("byte_buffer_fill_complete: Not Implement YET!!!", false));
-}
-
-//fills the buffer from given index to the end
-void byte_buffer_fill_to_end(byte_buffer_t* buffer, size_t index, unsigned char fillByte)
-{
-	assert(("byte_buffer_fill_to_end: Not Implement YET!!!", false));
-}
-
-//fills the buffer from start index by range with cnt bytes.
-void byte_buffer_fill_range(byte_buffer_t* buffer, size_t startIndex, size_t cnt, unsigned char fillByte)
-{
-	assert(("byte_buffer_fill_range: Not Implement YET!!!", false));
-}
-
 
 void byte_buffer_mode_set(byte_buffer_t* buffer, byte_buffer_mode_t mode)
 {
