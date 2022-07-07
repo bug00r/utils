@@ -203,19 +203,28 @@ void byte_buffer_append_bytes(byte_buffer_t* _buffer, unsigned char* bytes, size
 
 
 //replace set byte or bytes from given index
-void byte_buffer_replace_byte(byte_buffer_t* buffer, size_t index, unsigned char byte)
+void byte_buffer_replace_byte(byte_buffer_t* _buffer, size_t index, unsigned char byte)
 {
-	assert(("byte_buffer_replace_byte: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		byte_buffer_append_byte(buffer, byte);
+		
+		buffer->offset = oldOffset;
+	}
 }
 
-void byte_buffer_replace_bytes(byte_buffer_t* buffer, size_t index, unsigned char* bytes, size_t cntBytes)
+void byte_buffer_replace_bytes(byte_buffer_t* _buffer, size_t index, unsigned char* bytes, size_t cntBytes)
 {
 	assert(("byte_buffer_replace_bytes: Not Implement YET!!!", false));
 }
 
 
 //insert set byte or bytes at given index. Moves other values based on mode.
-void byte_buffer_insert_byte(byte_buffer_t* buffer, size_t index, unsigned char byte)
+void byte_buffer_insert_byte(byte_buffer_t* _buffer, size_t index, unsigned char byte)
 {
 	assert(("byte_buffer_insert_byte: Not Implement YET!!!", false));
 }
