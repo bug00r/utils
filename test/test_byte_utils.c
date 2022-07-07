@@ -605,6 +605,80 @@ static void test_bb_append_bytes_skip()
 	DEBUG_LOG("<<<\n");
 }
 
+static void test_bb_append_bytes_ring()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_RING, &rawBuffer[0], buffSize);
+
+	byte_buffer_clear(&buffer);
+
+	unsigned char bytes1[10] = "0123456789";
+	size_t cntBytes1 = 10;
+	unsigned char bytes2[6] = "ABCDEF";
+	size_t cntBytes2 = 6;
+	unsigned char bytes3[10] = "GHIJKLMNOP";
+	size_t cntBytes3 = 10;
+
+	byte_buffer_append_bytes(&buffer, &bytes1[0], cntBytes1);
+
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	for (size_t curIdx = cntBytes1; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	byte_buffer_append_bytes(&buffer, &bytes2[0], cntBytes2);
+	
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	size_t endBytes2 =  cntBytes2 + cntBytes1;
+	size_t curByteBytes = 0;
+	for (size_t curByte = cntBytes1; curByte < endBytes2; curByte++, curByteBytes++)
+	{
+		assert(buffer.buffer[curByte] == bytes2[curByteBytes]);
+	}
+
+	for (size_t curIdx = endBytes2; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	#ifdef debug
+	printf("Bytes 0-9A-F:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	byte_buffer_append_bytes(&buffer, &bytes3[0], cntBytes3);
+
+	unsigned char ringResultBytes[20] = "KLMNOP6789ABCDEFGHIJ";
+
+	for (size_t curByte = 0; curByte < buffer.size; curByte++)
+	{
+		assert(buffer.buffer[curByte] == ringResultBytes[curByte]);
+	}
+
+	#ifdef debug
+	printf("RING bytes:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+
+	DEBUG_LOG("<<<\n");
+}
+
 static void test_bb_dummy()
 {
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
@@ -631,8 +705,10 @@ int main(int argc, char **argv) {
 	test_bb_append_byte();
 
 	test_bb_append_bytes_trunc();
-	
+
 	test_bb_append_bytes_skip();
+
+	test_bb_append_bytes_ring();
 
 	DEBUG_LOG("<< end byte utils test:\n");
 

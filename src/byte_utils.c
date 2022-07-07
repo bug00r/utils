@@ -169,6 +169,11 @@ static void __byte_buffer_append_bytes_skip(byte_buffer_t* _buffer, unsigned cha
 static void __byte_buffer_append_bytes_ring(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
 {
 	byte_buffer_t* buffer = _buffer;
+
+	for ( size_t curByte = 0; curByte < cntBytes; curByte++ )
+	{
+		byte_buffer_append_byte(buffer, bytes[curByte]);
+	}
 }
 
 void byte_buffer_append_bytes(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
