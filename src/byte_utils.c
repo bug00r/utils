@@ -83,20 +83,26 @@ void byte_buffer_fill_range(byte_buffer_t* _buffer, size_t startIndex, size_t cn
 }
 
 
-void byte_buffer_clear(byte_buffer_t* buffer)
+void byte_buffer_clear(byte_buffer_t* _buffer)
 {
-	assert(("byte_buffer_clear: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	byte_buffer_fill_complete(buffer, 0);
+	buffer->offset = 0;
 }
 
-void byte_buffer_mode_set(byte_buffer_t* buffer, byte_buffer_mode_t mode)
+void byte_buffer_mode_set(byte_buffer_t* _buffer, byte_buffer_mode_t mode)
 {
-	assert(("byte_buffer_mode_set: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		buffer->mode = mode;
+	}
 }
 
 
 byte_buffer_mode_t byte_buffer_mode_get(byte_buffer_t* buffer)
 {
-	assert(("byte_buffer_mode_get: Not Implement YET!!!", false));
+	return buffer->mode;
 }
 
 
@@ -107,14 +113,118 @@ bool byte_buffer_is_alloc(byte_buffer_t* buffer)
 
 
 //adding byte or bytes to the buffer
-void byte_buffer_append_byte(byte_buffer_t* buffer, unsigned char byte)
+void byte_buffer_append_byte(byte_buffer_t* _buffer, unsigned char byte)
 {
-	assert(("byte_buffer_append_byte: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{
+		size_t usedOffset = buffer->offset;
+		bool isOverflow = (usedOffset >= buffer->size);
+
+		if (isOverflow)
+		{
+			switch(buffer->mode)
+			{
+				case BYTE_BUFFER_TRUNCATE:
+				case BYTE_BUFFER_SKIP:
+										return;
+				case BYTE_BUFFER_RING:  usedOffset = 0;
+										buffer->offset = usedOffset + 1;
+										break;
+				default: return;
+			}
+		}
+		else {
+			buffer->offset++;
+		}
+			
+		buffer->buffer[usedOffset] = byte;
+	}
 }
 
-void byte_buffer_append_bytes(byte_buffer_t* buffer, unsigned char* bytes, size_t cntBytes)
+static void __byte_buffer_append_bytes_trunc(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
 {
-	assert(("byte_buffer_append_bytes: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	size_t curOffset = buffer->offset;
+	int untilEndBytes = buffer->size - curOffset;
+
+	//not space left and TRUNCMODE stopps here
+	if ( untilEndBytes == 0 ) return;
+
+	size_t cntCopyBytes = ( untilEndBytes < cntBytes ? untilEndBytes : cntBytes);
+
+	memcpy( buffer->buffer + curOffset, bytes, cntCopyBytes );
+
+	buffer->offset += cntCopyBytes;
+}
+
+static void __byte_buffer_append_bytes_skip(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
+{
+	byte_buffer_t* buffer = _buffer;
+}
+
+static void __byte_buffer_append_bytes_ring(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
+{
+	byte_buffer_t* buffer = _buffer;
+}
+
+void byte_buffer_append_bytes(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
+{
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		switch(buffer->mode)
+		{
+			case BYTE_BUFFER_TRUNCATE: 
+				__byte_buffer_append_bytes_trunc(buffer, bytes, cntBytes);
+				break;
+			case BYTE_BUFFER_SKIP: 
+				__byte_buffer_append_bytes_skip(buffer, bytes, cntBytes);
+				break;
+			case BYTE_BUFFER_RING: 
+				__byte_buffer_append_bytes_ring(buffer, bytes, cntBytes);
+				break;
+			default: 
+				__byte_buffer_append_bytes_trunc(buffer, bytes, cntBytes);
+				break;
+		}
+		/*
+		size_t curOffset = buffer->offset;
+		int untilEndBytes = buffer->size - curOffset;
+		int restBytes = cntBytes - untilEndBytes;
+
+		if ( restBytes < 0 ) restBytes = 0;
+
+		bool isOverflow = (untilEndBytes == 0) || (restBytes > 0) ;
+		
+		if ( isOverflow && buffer->mode == BYTE_BUFFER_SKIP ) return;
+
+		for
+		*/
+
+		/*size_t usedOffset = buffer->offset;
+		bool isOverflow = (usedOffset >= buffer->size);
+
+		if (isOverflow)
+		{
+			switch(buffer->mode)
+			{
+				case BYTE_BUFFER_TRUNCATE:
+				case BYTE_BUFFER_SKIP:
+										return;
+				case BYTE_BUFFER_RING:  usedOffset = 0;
+										buffer->offset = usedOffset + 1;
+										break;
+				default: return;
+			}
+		}
+		else {
+			buffer->offset++;
+		}
+			
+		buffer->buffer[usedOffset] = byte;
+		*/
+	}
 }
 
 

@@ -15,7 +15,7 @@ static void __test_bb_print_buffer(unsigned char* _buffer, size_t _size)
 
 	for (size_t curIdx = 0; curIdx < size; curIdx++ )
 	{
-		printf("%c",buffer[curIdx]);
+		printf("%c",(buffer[curIdx] == 0 ? '0' : buffer[curIdx]));
 	}
 
 	printf("]\n");
@@ -300,6 +300,311 @@ static void test_bb_fill_range()
 	DEBUG_LOG("<<<\n");
 }
 
+static void test_bb_clear()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+
+	byte_buffer_clear(&buffer);
+
+	for (size_t curIdx = 0; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	#ifdef debug
+	printf("0[0-N]:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_state()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	assert(byte_buffer_mode_get(&buffer) == BYTE_BUFFER_TRUNCATE);
+
+	byte_buffer_mode_set(&buffer, BYTE_BUFFER_RING);
+	assert(byte_buffer_mode_get(&buffer) == BYTE_BUFFER_RING);
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_append_byte()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+
+	byte_buffer_clear(&buffer);
+
+	unsigned char bytes[9] = "ABCDEFGHI";
+	size_t byteSize = 9;
+
+	for (size_t curByte = 0; curByte < byteSize; curByte++)
+	{
+		byte_buffer_append_byte(&buffer, bytes[curByte]);
+	}
+	
+	for (size_t curIdx = 0; curIdx < byteSize; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == bytes[curIdx]);
+	}
+
+	for (size_t curIdx = byteSize; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	//Test Overflow TRUNCATE. After append content should not change
+	byte_buffer_clear(&buffer);
+	unsigned char overFlowbytes[27] = "0123456789ABCDEFGHIJKLMNOPQ";
+	byteSize = 27;
+
+	for (size_t curByte = 0; curByte < byteSize; curByte++)
+	{
+		byte_buffer_append_byte(&buffer, overFlowbytes[curByte]);
+	}
+
+	for (size_t curIdx = byteSize; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == overFlowbytes[curIdx]);
+	}
+
+	#ifdef debug
+	printf("OF TRUNC:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	//Test Overflow SKIP. After append content should not change
+	byte_buffer_mode_set(&buffer, BYTE_BUFFER_SKIP);
+	byte_buffer_clear(&buffer);
+	
+	for (size_t curByte = 0; curByte < byteSize; curByte++)
+	{
+		byte_buffer_append_byte(&buffer, overFlowbytes[curByte]);
+	}
+
+	for (size_t curIdx = byteSize; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == overFlowbytes[curIdx]);
+	}
+
+	#ifdef debug
+	printf("OF SKIP:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	//Test Overflow RING. After reaching end of buffer it should begin at 0;
+	unsigned char ringResultbytes[20] = "KLMNOPQ789ABCDEFGHIJ";
+	byte_buffer_mode_set(&buffer, BYTE_BUFFER_RING);
+	byte_buffer_clear(&buffer);
+	
+	for (size_t curByte = 0; curByte < byteSize; curByte++)
+	{
+		byte_buffer_append_byte(&buffer, overFlowbytes[curByte]);
+	}
+
+	for (size_t curIdx = byteSize; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == ringResultbytes[curIdx]);
+	}
+
+	#ifdef debug
+	printf("OF RING:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_append_bytes_trunc()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+
+	byte_buffer_clear(&buffer);
+
+	unsigned char bytes1[10] = "0123456789";
+	size_t cntBytes1 = 10;
+	unsigned char bytes2[6] = "ABCDEF";
+	size_t cntBytes2 = 6;
+	unsigned char bytes3[10] = "GHIJKLMNOP";
+	size_t cntBytes3 = 10;
+
+	byte_buffer_append_bytes(&buffer, &bytes1[0], cntBytes1);
+
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	for (size_t curIdx = cntBytes1; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	byte_buffer_append_bytes(&buffer, &bytes2[0], cntBytes2);
+	
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	size_t endBytes2 =  cntBytes2 + cntBytes1;
+	size_t curByteBytes = 0;
+	for (size_t curByte = cntBytes1; curByte < endBytes2; curByte++, curByteBytes++)
+	{
+		assert(buffer.buffer[curByte] == bytes2[curByteBytes]);
+	}
+
+	for (size_t curIdx = endBytes2; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	#ifdef debug
+	printf("Bytes 0-9A-F:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	byte_buffer_append_bytes(&buffer, &bytes3[0], cntBytes3);
+
+		for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	endBytes2 =  cntBytes2 + cntBytes1;
+	curByteBytes = 0;
+	for (size_t curByte = cntBytes1; curByte < endBytes2; curByte++, curByteBytes++)
+	{
+		assert(buffer.buffer[curByte] == bytes2[curByteBytes]);
+	}
+
+	curByteBytes = 0;
+	for (size_t curIdx = endBytes2; curIdx < buffer.size; curIdx++, curByteBytes++)
+	{
+		assert(buffer.buffer[curIdx] == bytes3[curByteBytes]);
+	}
+
+	#ifdef debug
+	printf("Bytes 0-9A-J:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_append_bytes_skip()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_SKIP, &rawBuffer[0], buffSize);
+
+	byte_buffer_clear(&buffer);
+
+	unsigned char bytes1[10] = "0123456789";
+	size_t cntBytes1 = 10;
+	unsigned char bytes2[6] = "ABCDEF";
+	size_t cntBytes2 = 6;
+	unsigned char bytes3[10] = "GHIJKLMNOP";
+	size_t cntBytes3 = 10;
+
+	byte_buffer_append_bytes(&buffer, &bytes1[0], cntBytes1);
+
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	for (size_t curIdx = cntBytes1; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	byte_buffer_append_bytes(&buffer, &bytes2[0], cntBytes2);
+	
+	for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	size_t endBytes2 =  cntBytes2 + cntBytes1;
+	size_t curByteBytes = 0;
+	for (size_t curByte = cntBytes1; curByte < endBytes2; curByte++, curByteBytes++)
+	{
+		assert(buffer.buffer[curByte] == bytes2[curByteBytes]);
+	}
+
+	for (size_t curIdx = endBytes2; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	#ifdef debug
+	printf("Bytes 0-9A-F:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	byte_buffer_append_bytes(&buffer, &bytes3[0], cntBytes3);
+
+		for (size_t curByte = 0; curByte < cntBytes1; curByte++)
+	{
+		assert(buffer.buffer[curByte] == bytes1[curByte]);
+	}
+
+	endBytes2 =  cntBytes2 + cntBytes1;
+	curByteBytes = 0;
+	for (size_t curByte = cntBytes1; curByte < endBytes2; curByte++, curByteBytes++)
+	{
+		assert(buffer.buffer[curByte] == bytes2[curByteBytes]);
+	}
+
+	for (size_t curIdx = endBytes2; curIdx < buffer.size; curIdx++)
+	{
+		assert(buffer.buffer[curIdx] == 0);
+	}
+
+	#ifdef debug
+	printf("Bytes 0-9A-J:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+
+	DEBUG_LOG("<<<\n");
+}
+
 static void test_bb_dummy()
 {
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
@@ -318,6 +623,14 @@ int main(int argc, char **argv) {
 	test_bb_fill_to_end();
 
 	test_bb_fill_range();
+
+	test_bb_clear();
+
+	test_bb_state();
+
+	test_bb_append_byte();
+
+	test_bb_append_bytes_trunc();
 
 	DEBUG_LOG("<< end byte utils test:\n");
 
