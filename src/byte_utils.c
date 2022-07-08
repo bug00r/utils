@@ -4,7 +4,7 @@ static void __byte_buffer_append_bytes_trunc(byte_buffer_t* _buffer, unsigned ch
 {
 	byte_buffer_t* buffer = _buffer;
 	size_t curOffset = buffer->offset;
-	int untilEndBytes = buffer->size - curOffset;
+	size_t untilEndBytes = buffer->size - curOffset;
 
 	//not space left and TRUNCMODE stopps here
 	if ( untilEndBytes == 0 ) return;
