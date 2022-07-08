@@ -22,6 +22,16 @@ static void __test_bb_print_buffer(unsigned char* _buffer, size_t _size)
 }
 #endif
 
+static void __test_bb_equals(byte_buffer_t *_buffer, unsigned char* _testBuff)
+{
+	byte_buffer_t *buffer = _buffer;
+	unsigned char* testBuff = _testBuff;
+	for (size_t curByte = 0; curByte < buffer->size; curByte++)
+	{	
+		assert(buffer->buffer[curByte] == testBuff[curByte]);
+	}
+}
+
 static void test_bb_init()
 {
 	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
@@ -30,34 +40,50 @@ static void test_bb_init()
 	size_t buffSize = 20;
 
 	byte_buffer_t buffer;
+	byte_buffer_t *buffPtr = &buffer;
 
-	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	byte_buffer_init(buffPtr, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
-	assert(buffer.buffer == &rawBuffer[0]);
-	assert(buffer.size == buffSize);
-	assert(buffer.offset == 0);
-	assert(buffer.alloc == false);
-	assert(buffer.mode == BYTE_BUFFER_TRUNCATE);
+	assert(buffPtr->buffer == &rawBuffer[0]);
+	assert(buffPtr->size == buffSize);
+	assert(buffPtr->offset == 0);
+	assert(buffPtr->alloc == false);
+	assert(buffPtr->allocObj == false);
+	assert(buffPtr->mode == BYTE_BUFFER_TRUNCATE);
 
-	byte_buffer_free(&buffer);
+	byte_buffer_free(&buffPtr);
 
-	assert(buffer.buffer == NULL);
-	assert(buffer.size == 0);
-	assert(buffer.offset == 0);
+	assert(buffPtr->buffer == NULL);
+	assert(buffPtr->size == 0);
+	assert(buffPtr->offset == 0);
 
-	byte_buffer_init_new(&buffer, BYTE_BUFFER_RING, buffSize);
+	byte_buffer_init_new(buffPtr, BYTE_BUFFER_RING, buffSize);
 
-	assert(buffer.buffer != NULL);
-	assert(buffer.size == buffSize);
-	assert(buffer.offset == 0);
-	assert(buffer.alloc == true);
-	assert(buffer.mode == BYTE_BUFFER_RING);
+	assert(buffPtr->buffer != NULL);
+	assert(buffPtr->size == buffSize);
+	assert(buffPtr->offset == 0);
+	assert(buffPtr->alloc == true);
+	assert(buffPtr->allocObj == false);
+	assert(buffPtr->mode == BYTE_BUFFER_RING);
 
-	byte_buffer_free(&buffer);
+	byte_buffer_free(&buffPtr);
 
-	assert(buffer.buffer == NULL);
-	assert(buffer.size == 0);
-	assert(buffer.offset == 0);
+	assert(buffPtr->buffer == NULL);
+	assert(buffPtr->size == 0);
+	assert(buffPtr->offset == 0);
+
+	byte_buffer_t *bbObj = byte_buffer_new(BYTE_BUFFER_TRUNCATE, buffSize);
+
+	assert(bbObj->buffer != NULL);
+	assert(bbObj->size == buffSize);
+	assert(bbObj->offset == 0);
+	assert(bbObj->alloc == true);
+	assert(bbObj->allocObj == true);
+	assert(bbObj->mode == BYTE_BUFFER_TRUNCATE);
+
+	byte_buffer_free(&bbObj);
+
+	assert(bbObj == NULL);
 
 	DEBUG_LOG("<<<\n");
 }
@@ -663,12 +689,9 @@ static void test_bb_append_bytes_ring()
 
 	byte_buffer_append_bytes(&buffer, &bytes3[0], cntBytes3);
 
-	unsigned char ringResultBytes[20] = "KLMNOP6789ABCDEFGHIJ";
+	__test_bb_equals(&buffer, (unsigned char *)"KLMNOP6789ABCDEFGHIJ");
 
-	for (size_t curByte = 0; curByte < buffer.size; curByte++)
-	{
-		assert(buffer.buffer[curByte] == ringResultBytes[curByte]);
-	}
+	unsigned char ringResultBytes[20] = "KLMNOP6789ABCDEFGHIJ";
 
 	#ifdef debug
 	printf("RING bytes:");
@@ -699,12 +722,7 @@ static void test_bb_replace_byte()
 	byte_buffer_append_byte(&buffer, 'C');
 	byte_buffer_replace_byte(&buffer, 19, 'B');
 	
-	unsigned char replacedBytes[20] = "CCABAAAAABAAAAAAAAAB";
-
-	for (size_t curByte = 0; curByte < buffer.size; curByte++)
-	{
-		assert(buffer.buffer[curByte] == replacedBytes[curByte]);
-	}
+	__test_bb_equals(&buffer, (unsigned char *)"CCABAAAAABAAAAAAAAAB");	
 
 	#ifdef debug
 	printf("REPLACE byte:");
@@ -743,15 +761,381 @@ static void test_bb_replace_bytes()
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
 
-	unsigned char replacedBytes[20] = "012VWXYZ89CCCAAAAAAA";
+	__test_bb_equals(&buffer, (unsigned char *)"012VWXYZ89CCCAAAAAAA");	
 
-	for (size_t curByte = 0; curByte < buffer.size; curByte++)
-	{	
-		assert(buffer.buffer[curByte] == replacedBytes[curByte]);
-	}
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_insert_byte()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+
+	byte_buffer_fill_range(&buffer, 0, 5, 'A');
+	byte_buffer_fill_range(&buffer, 5, 10, 'B');
+	byte_buffer_fill_range(&buffer, 10, 15, 'C');
+	byte_buffer_fill_range(&buffer, 15, 20, 'D');
+
+	byte_buffer_insert_byte(&buffer, 0, 'E');
+	byte_buffer_insert_byte(&buffer, 6, 'F');
+	byte_buffer_insert_byte(&buffer, 19, 'G');
+	byte_buffer_insert_byte(&buffer, 29, 'H');
+
+	__test_bb_equals(&buffer, (unsigned char *)"EAAAAAFBBBBBCCCCCDDG");					 
+
+	#ifdef debug
+	printf("insert byte:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_insert_bytes()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_range(&buffer, 0, 5, 'A');
+	byte_buffer_fill_range(&buffer, 5, 10, 'B');
+	byte_buffer_fill_range(&buffer, 10, 15, 'C');
+	byte_buffer_fill_range(&buffer, 15, 20, 'D');
+
+	byte_buffer_insert_bytes(&buffer, 0, "EE", 2);
+	byte_buffer_insert_bytes(&buffer, 6, "FFF", 3);
+	byte_buffer_insert_bytes(&buffer, 18, "GG", 2);
+	byte_buffer_insert_bytes(&buffer, 29, "HH", 2);
+
+	__test_bb_equals(&buffer, (unsigned char *)"EEAAAAFFFABBBBBCCCGG");
+
+	#ifdef debug
+	printf("insert bytes:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_prepend_byte()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_range(&buffer, 0, 5, 'A');
+	byte_buffer_fill_range(&buffer, 5, 10, 'B');
+	byte_buffer_fill_range(&buffer, 10, 15, 'C');
+	byte_buffer_fill_range(&buffer, 15, 20, 'D');
+
+	byte_buffer_prepend_byte(&buffer, 'E');
+	byte_buffer_prepend_byte(&buffer, 'F');
+	byte_buffer_prepend_byte(&buffer, 'G');
+	byte_buffer_prepend_byte(&buffer, 'H');
+
+	__test_bb_equals(&buffer, (unsigned char *)"HGFEAAAAABBBBBCCCCCD");
+
+	#ifdef debug
+	printf("prepend byte:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_prepend_bytes()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_range(&buffer, 0, 5, 'A');
+	byte_buffer_fill_range(&buffer, 5, 10, 'B');
+	byte_buffer_fill_range(&buffer, 10, 15, 'C');
+	byte_buffer_fill_range(&buffer, 15, 20, 'D');
+
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"EE", 2);
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"FF", 2);
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"GG", 2);
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"HH", 2);
+
+	__test_bb_equals(&buffer, (unsigned char *)"HHGGFFEEAAAAABBBBBCC");
+
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"This is a override!!", 20);
+
+	__test_bb_equals(&buffer, (unsigned char *)"This is a override!!");
+
+	byte_buffer_prepend_bytes(&buffer,  (unsigned char *)"This is a override with overflow!!", 34);
+
+	__test_bb_equals(&buffer, (unsigned char *)"This is a override w");
+
+	#ifdef debug
+	printf("prepend bytes:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_append_buffer()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	
+	//Buffer1
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+	
+	//buffer2
+	unsigned char rawBuffer2[10];
+	size_t buffSize2 = 10;
+	
+	byte_buffer_t buffer2;
+
+	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
+	
+	byte_buffer_fill_complete(&buffer2, 'B');
+
+	//buffer3
+	unsigned char rawBuffer3[5];
+	size_t buffSize3 = 5;
+	
+	byte_buffer_t buffer3;
+
+	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
+	
+	byte_buffer_fill_complete(&buffer3, 'C');
+
+
+	byte_buffer_append_buffer(&buffer, &buffer2);
+	byte_buffer_append_buffer(&buffer, &buffer3);
+
+	__test_bb_equals(&buffer, (unsigned char *)"BBBBBBBBBBCCCCCAAAAA");
+
+	#ifdef debug
+	printf("append buff:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_prepend_buffer()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	//Buffer1
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+	
+	//buffer2
+	unsigned char rawBuffer2[10];
+	size_t buffSize2 = 10;
+	
+	byte_buffer_t buffer2;
+
+	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
+	
+	byte_buffer_fill_complete(&buffer2, 'B');
+
+	//buffer3
+	unsigned char rawBuffer3[5];
+	size_t buffSize3 = 5;
+	
+	byte_buffer_t buffer3;
+
+	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
+	
+	byte_buffer_fill_complete(&buffer3, 'C');
+
+
+	byte_buffer_prepend_buffer(&buffer, &buffer2);
+	byte_buffer_prepend_buffer(&buffer, &buffer3);
+
+	__test_bb_equals(&buffer, (unsigned char *)"CCCCCBBBBBBBBBBAAAAA");
+
+	#ifdef debug
+	printf("prepend buff:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
 	
 	DEBUG_LOG("<<<\n");
 }
+
+static void test_bb_replace_buffer()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+
+	//Buffer1
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+	
+	//buffer2
+	unsigned char rawBuffer2[10];
+	size_t buffSize2 = 10;
+	
+	byte_buffer_t buffer2;
+
+	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
+	
+	byte_buffer_fill_complete(&buffer2, 'B');
+
+	//buffer3
+	unsigned char rawBuffer3[5];
+	size_t buffSize3 = 5;
+	
+	byte_buffer_t buffer3;
+
+	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
+	
+	byte_buffer_fill_complete(&buffer3, 'C');
+
+
+	byte_buffer_replace_buffer(&buffer, &buffer2, 4);
+	byte_buffer_replace_buffer(&buffer, &buffer3, 6);
+
+	__test_bb_equals(&buffer, (unsigned char *)"AAAABBCCCCCBBBAAAAAA");
+
+	#ifdef debug
+	printf("replace buff:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+	
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_insert_buffer()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	
+	//Buffer1
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+	
+	//buffer2
+	unsigned char rawBuffer2[10];
+	size_t buffSize2 = 10;
+	
+	byte_buffer_t buffer2;
+
+	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
+	
+	byte_buffer_fill_complete(&buffer2, 'B');
+
+	//buffer3
+	unsigned char rawBuffer3[5];
+	size_t buffSize3 = 5;
+	
+	byte_buffer_t buffer3;
+
+	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
+	
+	byte_buffer_fill_complete(&buffer3, 'C');
+
+	byte_buffer_insert_buffer(&buffer, &buffer2, 0);
+	byte_buffer_insert_buffer(&buffer, &buffer3, 3);
+
+	__test_bb_equals(&buffer, (unsigned char *)"BBBCCCCCBBBBBBBAAAAA");
+
+	#ifdef debug
+	printf("insert buff:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+	
+	DEBUG_LOG("<<<\n");
+}
+
+static void test_bb_join_buffer()
+{
+	DEBUG_LOG_ARGS(">>> %s => %s\n", __FILE__, __func__);
+	
+	//Buffer1
+	unsigned char rawBuffer[20];
+	size_t buffSize = 20;
+	
+	byte_buffer_t buffer;
+
+	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
+	
+	byte_buffer_fill_complete(&buffer, 'A');
+	
+	//buffer2
+	unsigned char rawBuffer2[10];
+	size_t buffSize2 = 10;
+	
+	byte_buffer_t buffer2;
+
+	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
+	
+	byte_buffer_fill_complete(&buffer2, 'B');
+
+	//joining buffer
+	byte_buffer_t *joined = byte_buffer_join_buffer(&buffer, &buffer2, BYTE_BUFFER_RING);
+
+	assert(joined != NULL);
+	assert(joined->buffer != NULL);
+	assert(joined->size == 30);
+	assert(joined->offset == 30);
+	assert(joined->alloc == true);
+	assert(joined->allocObj == true);
+
+	__test_bb_equals(joined, (unsigned char *)"AAAAAAAAAAAAAAAAAAAABBBBBBBBBB");
+
+	#ifdef debug
+	printf("join buff:");
+	__test_bb_print_buffer(joined->buffer, joined->size);
+	#endif
+
+	byte_buffer_free(&joined);
+
+	assert(joined == NULL);
+
+	DEBUG_LOG("<<<\n");
+}
+
 
 static void test_bb_dummy()
 {
@@ -787,6 +1171,24 @@ int main(int argc, char **argv) {
 	test_bb_replace_byte();
 
 	test_bb_replace_bytes();
+
+	test_bb_insert_byte();
+
+	test_bb_insert_bytes();
+
+	test_bb_prepend_byte();
+
+	test_bb_prepend_bytes();
+
+	test_bb_append_buffer();
+
+	test_bb_prepend_buffer();
+
+	test_bb_replace_buffer();
+
+	test_bb_insert_buffer();
+
+	test_bb_join_buffer();
 
 	DEBUG_LOG("<< end byte utils test:\n");
 

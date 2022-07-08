@@ -35,6 +35,17 @@ static void __byte_buffer_append_bytes_ring(byte_buffer_t* _buffer, unsigned cha
 }
 
 
+byte_buffer_t* byte_buffer_new(byte_buffer_mode_t mode, size_t rawBuffSize)
+{
+	byte_buffer_t* new_buf = malloc(sizeof(byte_buffer_t));
+
+	byte_buffer_init_new(new_buf, mode, rawBuffSize);
+
+	new_buf->allocObj = true;
+
+	return new_buf;
+}
+
 //Took outside buffer to work on it
 void byte_buffer_init(byte_buffer_t* _buffer, 
                       byte_buffer_mode_t mode, 
@@ -45,6 +56,7 @@ void byte_buffer_init(byte_buffer_t* _buffer,
 	if (buffer)
 	{
 		buffer->alloc = false;
+		buffer->allocObj = false;
 		buffer->mode = mode;
 		buffer->offset = 0;
 		buffer->size = rawBuffSize;
@@ -62,6 +74,7 @@ void byte_buffer_init_new(byte_buffer_t* _buffer,
 	if (buffer)
 	{
 		buffer->alloc = true;
+		buffer->allocObj = false;
 		buffer->mode = mode;
 		buffer->offset = 0;
 		buffer->size = rawBuffSize;
@@ -70,18 +83,26 @@ void byte_buffer_init_new(byte_buffer_t* _buffer,
 }
 
 
-void byte_buffer_free(byte_buffer_t* _buffer)
+void byte_buffer_free(byte_buffer_t** _buffer)
 {
-	byte_buffer_t* buffer = _buffer;
-	if (buffer)
+	byte_buffer_t** buffer = _buffer;
+	if (buffer && *buffer)
 	{
-		if (buffer->alloc)
+		byte_buffer_t* toDelete = *buffer;
+		if (toDelete->alloc)
 		{
-			free(buffer->buffer);
+			free(toDelete->buffer);
 		}
-		buffer->buffer = NULL;
-		buffer->size = 0;
-		buffer->offset = 0;
+
+		toDelete->buffer = NULL;
+		toDelete->size = 0;
+		toDelete->offset = 0;
+
+		if (toDelete->allocObj)
+		{
+			free(toDelete);
+			*buffer = NULL;
+		}
 	}
 }
 
@@ -235,52 +256,123 @@ void byte_buffer_replace_bytes(byte_buffer_t* _buffer, size_t index, unsigned ch
 //insert set byte or bytes at given index. Moves other values based on mode.
 void byte_buffer_insert_byte(byte_buffer_t* _buffer, size_t index, unsigned char byte)
 {
-	assert(("byte_buffer_insert_byte: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer && index < buffer->size)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		size_t restByteCnt = buffer->size - buffer->offset;
+		unsigned char *restBytes = malloc(restByteCnt * sizeof(unsigned char));
+		
+		memcpy(restBytes, buffer->buffer + buffer->offset, restByteCnt);
+
+		byte_buffer_append_byte(buffer, byte);
+		
+		byte_buffer_append_bytes(buffer, restBytes, restByteCnt);
+
+		free(restBytes);
+
+		buffer->offset = oldOffset;
+	}
 }
 
-void byte_buffer_insert_bytes(byte_buffer_t* buffer, size_t index, unsigned char* bytes, size_t cntBytes)
+void byte_buffer_insert_bytes(byte_buffer_t* _buffer, size_t index, unsigned char* bytes, size_t cntBytes)
 {
-	assert(("byte_buffer_insert_bytes: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer && index < buffer->size)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		size_t restByteCnt = buffer->size - buffer->offset;
+		unsigned char *restBytes = malloc(restByteCnt * sizeof(unsigned char));
+		
+		memcpy(restBytes, buffer->buffer + buffer->offset, restByteCnt);
+
+		byte_buffer_append_bytes(buffer, bytes, cntBytes);
+		byte_buffer_append_bytes(buffer, restBytes, restByteCnt);
+
+		free(restBytes);
+
+		buffer->offset = oldOffset;
+	}
 }
 
 
 //insert byte or bytes at index 0. Moves other values based on mode.
-void byte_buffer_prepend_byte(byte_buffer_t* buffer, unsigned char byte)
+void byte_buffer_prepend_byte(byte_buffer_t* _buffer, unsigned char byte)
 {
-	assert(("byte_buffer_prepend_byte: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		byte_buffer_insert_byte(buffer, 0, byte);
+	}
 }
 
-void byte_buffer_prepend_bytes(byte_buffer_t* buffer, unsigned char* bytes, size_t cntBytes)
+void byte_buffer_prepend_bytes(byte_buffer_t* _buffer, unsigned char* bytes, size_t cntBytes)
 {
-	assert(("byte_buffer_prepend_bytes: Not Implement YET!!!", false));
-}
-
-
-void byte_buffer_append_buffer(byte_buffer_t* dest, byte_buffer_t* src)
-{
-	assert(("byte_buffer_append_buffer: Not Implement YET!!!", false));
-}
-
-void byte_buffer_prepend_buffer(byte_buffer_t* dest, byte_buffer_t* src)
-{
-	assert(("byte_buffer_prepend_buffer: Not Implement YET!!!", false));
-}
-
-void byte_buffer_replace_buffer(byte_buffer_t* dest, byte_buffer_t* src, size_t index)
-{
-	assert(("byte_buffer_replace_buffer: Not Implement YET!!!", false));
-}
-
-void byte_buffer_insert_buffer(byte_buffer_t* dest, byte_buffer_t* src, size_t index)
-{
-	assert(("byte_buffer_insert_buffer: Not Implement YET!!!", false));
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		byte_buffer_insert_bytes(buffer, 0, bytes, cntBytes);
+	}
 }
 
 
-//merges two buffer into a new with the size and content of buffer A and B.
-byte_buffer_t* byte_buffer_join_buffer(byte_buffer_t* bufferA, byte_buffer_t* bufferB)
+void byte_buffer_append_buffer(byte_buffer_t* _dest, byte_buffer_t* _src)
 {
-	assert(("byte_buffer_join_buffer: Not Implement YET!!!", false));
-	return NULL;
+	byte_buffer_t* dest = _dest;
+	byte_buffer_t* src = _src;
+	if (dest && dest)
+	{	
+		byte_buffer_append_bytes(dest, src->buffer, src->size);
+	}
+}
+
+void byte_buffer_prepend_buffer(byte_buffer_t* _dest, byte_buffer_t* _src)
+{
+	byte_buffer_t* dest = _dest;
+	byte_buffer_t* src = _src;
+	if (dest && dest)
+	{	
+		byte_buffer_prepend_bytes(dest, src->buffer, src->size);
+	}
+}
+
+void byte_buffer_replace_buffer(byte_buffer_t* _dest, byte_buffer_t* _src, size_t index)
+{
+	byte_buffer_t* dest = _dest;
+	byte_buffer_t* src = _src;
+	if (dest && dest)
+	{	
+		byte_buffer_replace_bytes(dest, index, src->buffer, src->size);
+	}
+}
+
+void byte_buffer_insert_buffer(byte_buffer_t* _dest, byte_buffer_t* _src, size_t index)
+{
+	byte_buffer_t* dest = _dest;
+	byte_buffer_t* src = _src;
+	if (dest && dest)
+	{	
+		byte_buffer_insert_bytes(dest, index, src->buffer, src->size);
+	}
+}
+
+byte_buffer_t* byte_buffer_join_buffer(byte_buffer_t* _bufferA, byte_buffer_t* _bufferB, byte_buffer_mode_t resultMode)
+{
+	byte_buffer_t* bufferA = _bufferA;
+	byte_buffer_t* bufferB = _bufferB;
+	byte_buffer_t* result = NULL;
+
+	if (bufferA && bufferB)
+	{	
+		result = byte_buffer_new( resultMode, bufferA->size + bufferB->size );
+		byte_buffer_append_buffer(result, bufferA);
+		byte_buffer_append_buffer(result, bufferB);
+	}
+
+	return result;
 }
 

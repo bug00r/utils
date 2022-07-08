@@ -15,12 +15,16 @@ typedef enum
 
 typedef struct 
 {
-    bool alloc;
-    byte_buffer_mode_t mode;
-    size_t offset;
-    size_t size;
-    unsigned char* buffer;
+    bool allocObj;              //true, if byte_buffer_new was called
+    bool alloc;                 //true, if byte_buffer_new or byte_buffer_init_new were called
+    byte_buffer_mode_t mode;    //mode of buffer
+    size_t offset;              //current intern offset
+    size_t size;                //capacity of the buffer
+    unsigned char* buffer;      //the rawBuffer Data
 } byte_buffer_t;
+
+//Allocates a complete Buffer Object
+byte_buffer_t* byte_buffer_new(byte_buffer_mode_t mode, size_t rawBuffSize);
 
 //Took outside buffer to work on it
 void byte_buffer_init(byte_buffer_t* buffer, 
@@ -33,7 +37,7 @@ void byte_buffer_init_new(byte_buffer_t* buffer,
                           byte_buffer_mode_t mode, 
                           size_t rawBuffSize);
 
-void byte_buffer_free(byte_buffer_t* buffer);
+void byte_buffer_free(byte_buffer_t** buffer);
 
 void byte_buffer_clear(byte_buffer_t* buffer);
 
@@ -71,7 +75,9 @@ void byte_buffer_prepend_buffer(byte_buffer_t* dest, byte_buffer_t* src);
 void byte_buffer_replace_buffer(byte_buffer_t* dest, byte_buffer_t* src, size_t index);
 void byte_buffer_insert_buffer(byte_buffer_t* dest, byte_buffer_t* src, size_t index);
 
-//merges two buffer into a new with the size and content of buffer A and B.
-byte_buffer_t* byte_buffer_join_buffer(byte_buffer_t* bufferA, byte_buffer_t* bufferB);
+/* Merges two buffer into a new with the size and content of buffer A and B. 
+   The Result Buffer musst be free'd by caller in reason of dynamic memory allocation.
+*/
+byte_buffer_t* byte_buffer_join_buffer(byte_buffer_t* bufferA, byte_buffer_t* bufferB, byte_buffer_mode_t resultMode);
 
 #endif
