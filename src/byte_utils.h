@@ -3,6 +3,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -57,18 +59,22 @@ bool byte_buffer_is_alloc(byte_buffer_t* buffer);
 //adding byte or bytes to the buffer
 void byte_buffer_append_byte(byte_buffer_t* buffer, unsigned char byte);
 void byte_buffer_append_bytes(byte_buffer_t* buffer, unsigned char* bytes, size_t cntBytes);
+void byte_buffer_append_bytes_fmt(byte_buffer_t* buffer, unsigned char* fmt, ...);
 
 //replace set byte or bytes from given index
 void byte_buffer_replace_byte(byte_buffer_t* buffer, size_t index, unsigned char byte);
 void byte_buffer_replace_bytes(byte_buffer_t* buffer, size_t index, unsigned char* bytes, size_t cntBytes);
+void byte_buffer_replace_bytes_fmt(byte_buffer_t* buffer, size_t index, unsigned char* fmt, ...);
 
 //insert set byte or bytes at given index. Moves other values based on mode.
 void byte_buffer_insert_byte(byte_buffer_t* buffer, size_t index, unsigned char byte);
 void byte_buffer_insert_bytes(byte_buffer_t* buffer, size_t index, unsigned char* bytes, size_t cntBytes);
+void byte_buffer_insert_bytes_fmt(byte_buffer_t* buffer, size_t index, unsigned char* fmt, ...);
 
 //insert byte or bytes at index 0. Moves other values based on mode.
 void byte_buffer_prepend_byte(byte_buffer_t* buffer, unsigned char byte);
 void byte_buffer_prepend_bytes(byte_buffer_t* buffer, unsigned char* bytes, size_t cntBytes);
+void byte_buffer_prepend_bytes_fmt(byte_buffer_t* buffer, unsigned char* fmt, ...);
 
 void byte_buffer_append_buffer(byte_buffer_t* dest, byte_buffer_t* src);
 void byte_buffer_prepend_buffer(byte_buffer_t* dest, byte_buffer_t* src);

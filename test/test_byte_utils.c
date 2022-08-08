@@ -544,6 +544,21 @@ static void test_bb_append_bytes_trunc()
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
 
+	byte_buffer_clear(&buffer);
+
+	byte_buffer_fill_complete(&buffer, 'A');
+
+	byte_buffer_append_bytes_fmt(&buffer, "[%.3f]", 47.222f);
+
+	byte_buffer_append_bytes_fmt(&buffer, "[%s]", "FU");
+
+	#ifdef debug
+	printf("FMT APPEND: ");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	__test_bb_equals(&buffer, (unsigned char *)"[47.222][FU]AAAAAAAA");
+
 	DEBUG_LOG("<<<\n");
 }
 
@@ -763,6 +778,18 @@ static void test_bb_replace_bytes()
 
 	__test_bb_equals(&buffer, (unsigned char *)"012VWXYZ89CCCAAAAAAA");	
 
+	byte_buffer_replace_bytes_fmt(&buffer, 3,"[%.3f]", 47.222f);
+
+	byte_buffer_replace_bytes_fmt(&buffer, 15,"[%s]", "LOL");
+
+	#ifdef debug
+	printf("REPLACE bytes fmt:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	__test_bb_equals(&buffer, (unsigned char *)"012[47.222]CCAA[LOL]");	
+
+
 	DEBUG_LOG("<<<\n");
 }
 
@@ -824,6 +851,17 @@ static void test_bb_insert_bytes()
 	printf("insert bytes:");
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
+
+	byte_buffer_insert_bytes_fmt(&buffer, 3, "[%.3f]", 47.222f);
+
+	byte_buffer_insert_bytes_fmt(&buffer, 13, "[%s]", "TADA");
+
+	#ifdef debug
+	printf("insert bytes FMT:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	__test_bb_equals(&buffer, (unsigned char *)"EEA[47.222]AA[TADA]A");
 
 	DEBUG_LOG("<<<\n");
 }
@@ -894,6 +932,17 @@ static void test_bb_prepend_bytes()
 	printf("prepend bytes:");
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
+
+	byte_buffer_prepend_bytes_fmt(&buffer, "[%.3f]", 47.222f);
+
+	byte_buffer_prepend_bytes_fmt(&buffer, "[%s]", "IN");
+
+	#ifdef debug
+	printf("prepend bytes FMT:");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
+	__test_bb_equals(&buffer, (unsigned char *)"[IN][47.222]This is ");
 
 	DEBUG_LOG("<<<\n");
 }

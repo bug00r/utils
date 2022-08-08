@@ -222,6 +222,27 @@ void byte_buffer_append_bytes(byte_buffer_t* _buffer, unsigned char* bytes, size
 	}
 }
 
+static void byte_buffer_append_bytes_fmt_va(byte_buffer_t* buffer, unsigned char* fmt, va_list argptr)
+{
+	int buffsize = vsnprintf(NULL, 0, fmt, argptr) + 1;
+	char * bytebuffer = malloc(buffsize);
+	vsnprintf(bytebuffer, buffsize, fmt, argptr);
+
+	byte_buffer_append_bytes(buffer, (unsigned char*)bytebuffer, buffsize-1);
+
+	free(bytebuffer);
+}
+
+void byte_buffer_append_bytes_fmt(byte_buffer_t* buffer, unsigned char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	byte_buffer_append_bytes_fmt_va(buffer, fmt, args);
+
+	va_end(args);
+}
+
 
 //replace set byte or bytes from given index
 void byte_buffer_replace_byte(byte_buffer_t* _buffer, size_t index, unsigned char byte)
@@ -252,6 +273,24 @@ void byte_buffer_replace_bytes(byte_buffer_t* _buffer, size_t index, unsigned ch
 	}
 }
 
+void byte_buffer_replace_bytes_fmt(byte_buffer_t* _buffer, size_t index, unsigned char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	byte_buffer_t* buffer = _buffer;
+	if (buffer)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		byte_buffer_append_bytes_fmt_va(buffer, fmt, args);
+
+		buffer->offset = oldOffset;
+	}
+
+	va_end(args);
+}
 
 //insert set byte or bytes at given index. Moves other values based on mode.
 void byte_buffer_insert_byte(byte_buffer_t* _buffer, size_t index, unsigned char byte)
@@ -299,6 +338,41 @@ void byte_buffer_insert_bytes(byte_buffer_t* _buffer, size_t index, unsigned cha
 	}
 }
 
+static void byte_buffer_insert_bytes_fmt_va(byte_buffer_t* _buffer, size_t index, unsigned char* fmt, va_list argptr)
+{
+	
+	byte_buffer_t* buffer = _buffer;
+	
+	if (buffer && index < buffer->size)
+	{	
+		size_t oldOffset = buffer->offset;
+		buffer->offset = index;
+
+		size_t restByteCnt = buffer->size - buffer->offset;
+		unsigned char *restBytes = malloc(restByteCnt * sizeof(unsigned char));
+		
+		memcpy(restBytes, buffer->buffer + buffer->offset, restByteCnt);
+
+		byte_buffer_append_bytes_fmt_va(buffer, fmt, argptr);
+		byte_buffer_append_bytes(buffer, restBytes, restByteCnt);
+
+		free(restBytes);
+
+		buffer->offset = oldOffset;
+	}
+}
+
+void byte_buffer_insert_bytes_fmt(byte_buffer_t* _buffer, size_t index, unsigned char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	byte_buffer_t* buffer = _buffer;
+	
+	byte_buffer_insert_bytes_fmt_va(buffer, index, fmt, args);
+
+	va_end(args);
+}
 
 //insert byte or bytes at index 0. Moves other values based on mode.
 void byte_buffer_prepend_byte(byte_buffer_t* _buffer, unsigned char byte)
@@ -319,6 +393,19 @@ void byte_buffer_prepend_bytes(byte_buffer_t* _buffer, unsigned char* bytes, siz
 	}
 }
 
+void byte_buffer_prepend_bytes_fmt(byte_buffer_t* _buffer, unsigned char* fmt, ...)
+{
+
+	va_list args;
+	va_start(args, fmt);
+
+	byte_buffer_t* buffer = _buffer;
+	
+	byte_buffer_insert_bytes_fmt_va(buffer, 0, fmt, args);
+
+	va_end(args);
+
+}
 
 void byte_buffer_append_buffer(byte_buffer_t* _dest, byte_buffer_t* _src)
 {
