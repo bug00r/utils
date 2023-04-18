@@ -1,45 +1,35 @@
-MAKE?=mingw32-make
-AR?=ar
 ARFLAGS?=rcs
 PATHSEP?=/
-CC=gcc
 BUILDROOT?=build
-
-ifeq ($(CLANG),1)
-	export CC=clang
-endif
 
 BUILDDIR?=$(BUILDROOT)$(PATHSEP)$(CC)
 BUILDPATH?=$(BUILDDIR)$(PATHSEP)
 
-INSTALL_ROOT?=$(BUILDPATH)
-
-ifeq ($(DEBUG),1)
-	export debug=-ggdb -Ddebug=1
-	export isdebug=1
+ifndef PREFIX
+	INSTALL_ROOT=$(BUILDPATH)
+else
+	INSTALL_ROOT=$(PREFIX)$(PATHSEP)
+	ifeq ($(INSTALL_ROOT),/)
+	INSTALL_ROOT=$(BUILDPATH)
+	endif
 endif
 
-ifeq ($(ANALYSIS),1)
-	export analysis=-Danalysis=1
-	export isanalysis=1
+ifdef DEBUG
+	CFLAGS+=-ggdb
+	ifeq ($(DEBUG),)
+	CFLAGS+=-Ddebug=1
+	else 
+	CFLAGS+=-Ddebug=$(DEBUG)
+	endif
 endif
 
-ifeq ($(DEBUG),2)
-	export debug=-ggdb -Ddebug=2
-	export isdebug=1
+ifeq ($(M32),1)
+	CFLAGS+=-m32
+	BIT_SUFFIX+=32
 endif
 
-ifeq ($(DEBUG),3)
-	export debug=-ggdb -Ddebug=3
-	export isdebug=1
-endif
-
-ifeq ($(OUTPUT),1)
-	export outimg= -Doutput=1
-endif
-
-#-ggdb -O1
-
+#CFLAGS+=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra
+CFLAGS+=-std=c11 -Wall -Wextra
 
 BIT_SUFFIX=
 
@@ -48,7 +38,7 @@ ifeq ($(M32),1)
 	BIT_SUFFIX+=32
 endif
 
-CFLAGS+=-std=c11 -DIN_LIBXML -DLIBXML_STATIC -Wpedantic -Wall -Wextra $(debug)
+CFLAGS+=-std=c11 -DIN_LIBXML -DLIBXML_STATIC -Wpedantic -Wall -Wextra
 
 _SRC_FILES+=string_utils regex_utils resource xpath_utils file_path_utils xml_source xml_utils number_utils xslt_utils byte_utils
 
@@ -59,8 +49,8 @@ LIB_TARGET:=$(BUILDPATH)$(LIB)
 
 OBJS+=$(patsubst %,$(BUILDPATH)%,$(patsubst %,%.o,$(_SRC_FILES)))
 
-INCLUDE?=-I/c/dev/include
-LIBS?=-L/c/dev/lib$(BIT_SUFFIX) -L./$(BUILDPATH)
+CFLAGS+=-I/c/dev/include -I./src
+LDFLAGS+=-L/c/dev/lib$(BIT_SUFFIX) -L./$(BUILDPATH)
 
 
 THIRD_PARTY_LIBS=exslt xslt xml2 archive crypto nettle regex lzma z lz4 bz2 bcrypt zstd iconv
@@ -71,6 +61,8 @@ CFLAGS+=-DPCRE2_STATIC
 OS_LIBS=kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 uuid ole32 oleaut32 comctl32 ws2_32
 
 USED_LIBS=$(patsubst %,-l%, utils $(REGEX_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS) dl_list )
+
+LDFLAGS+=-static $(USED_LIBS)
 
 #wc -c < filename => if needed for after compression size of bytes
 RES=zip_resource
@@ -88,31 +80,31 @@ $(LIB_TARGET): $(_SRC_FILES)
 	$(AR) $(ARFLAGS) $(LIB_TARGET) $(OBJS)
 
 $(_SRC_FILES):
-	$(CC) $(CFLAGS) -c src/$@.c -o $(BUILDPATH)$@.o $(INCLUDE) $(debug)
+	$(CC) $(CFLAGS) -c src/$@.c -o $(BUILDPATH)$@.o 
 
-test_regex_utils: mkbuilddir 
-	$(CC) $(CFLAGS) ./test/test_regex_utils.c ./src/regex_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_regex_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_regex_utils.exe
+test_regex_utils: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/regex_utils.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
-test_xslt_utils: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xslt_utils.c ./src/xslt_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xslt_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_xslt_utils.exe
+test_xslt_utils: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/xslt_utils.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
-test_xml_utils: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xml_utils.c ./src/xml_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_xml_utils.exe
+test_xml_utils: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/xml_utils.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
-test_xml_source: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_xml_source.c ./src/xml_source.c $(RES_O_PATH) -o $(BUILDPATH)test_xml_source.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_xml_source.exe
+test_xml_source: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/xml_source.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
-test_resource: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_resource.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)test_resource.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_resource.exe
+test_resource: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/resource.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
-test_byte_utils: mkbuilddir mkzip addzip 
-	$(CC) $(CFLAGS) ./test/test_byte_utils.c ./src/byte_utils.c $(RES_O_PATH) -o $(BUILDPATH)test_byte_utils.exe -I./src/ $(INCLUDE) $(LIBS) -static $(USED_LIBS) $(debug)
-	$(BUILDPATH)test_byte_utils.exe
+test_byte_utils: mkbuilddir mkzip addzip $(LIB_TARGET)
+	$(CC) $(CFLAGS) ./test/$@.c ./src/byte_utils.c $(RES_O_PATH) -o $(BUILDPATH)$@.exe $(LDFLAGS)
+	$(BUILDPATH)$@.exe
 
 .PHONY: clean mkbuilddir mkzip addzip test 
 

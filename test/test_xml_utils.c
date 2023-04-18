@@ -91,7 +91,7 @@ static void test_xml_ctx_file() {
 		DEBUG_LOG_ARGS(">>> BYTES %i\n", writtenbytes);
 	#endif
 
-	const char *file = "build\\gcc\\dumpbasehero.xml";
+	const char *file = "build\\cc\\dumpbasehero.xml";
 
 	xml_ctx_save_file(nCtx, file);
 
