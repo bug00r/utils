@@ -22,9 +22,9 @@ static void __test_bb_print_buffer(unsigned char* _buffer, size_t _size)
 }
 #endif
 
-static void __test_bb_equals(byte_buffer_t *_buffer, unsigned char* _testBuff)
+static void __test_bb_equals(ByteBuffer *_buffer, unsigned char* _testBuff)
 {
-	byte_buffer_t *buffer = _buffer;
+	ByteBuffer *buffer = _buffer;
 	unsigned char* testBuff = _testBuff;
 	for (size_t curByte = 0; curByte < buffer->size; curByte++)
 	{	
@@ -39,8 +39,8 @@ static void test_bb_init()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
-	byte_buffer_t *buffPtr = &buffer;
+	ByteBuffer buffer;
+	ByteBuffer *buffPtr = &buffer;
 
 	byte_buffer_init(buffPtr, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -72,7 +72,7 @@ static void test_bb_init()
 	assert(buffPtr->size == 0);
 	assert(buffPtr->offset == 0);
 
-	byte_buffer_t *bbObj = byte_buffer_new(BYTE_BUFFER_TRUNCATE, buffSize);
+	ByteBuffer *bbObj = byte_buffer_new(BYTE_BUFFER_TRUNCATE, buffSize);
 
 	assert(bbObj->buffer != NULL);
 	assert(bbObj->size == buffSize);
@@ -95,7 +95,7 @@ static void test_bb_fill_complete()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -122,7 +122,7 @@ static void test_bb_fill_to_end()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -191,7 +191,7 @@ static void test_bb_fill_range()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -333,7 +333,7 @@ static void test_bb_clear()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -359,7 +359,7 @@ static void test_bb_state()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	assert(byte_buffer_mode_get(&buffer) == BYTE_BUFFER_TRUNCATE);
@@ -377,7 +377,7 @@ static void test_bb_append_byte()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -470,7 +470,7 @@ static void test_bb_append_bytes_trunc()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -569,7 +569,7 @@ static void test_bb_append_bytes_skip()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_SKIP, &rawBuffer[0], buffSize);
 
@@ -653,7 +653,7 @@ static void test_bb_append_bytes_ring()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_RING, &rawBuffer[0], buffSize);
 
@@ -724,7 +724,7 @@ static void test_bb_replace_byte()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -754,7 +754,7 @@ static void test_bb_replace_bytes()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -800,7 +800,7 @@ static void test_bb_insert_byte()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 
@@ -831,7 +831,7 @@ static void test_bb_insert_bytes()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -873,7 +873,7 @@ static void test_bb_prepend_byte()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -904,7 +904,7 @@ static void test_bb_prepend_bytes()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -955,7 +955,7 @@ static void test_bb_append_buffer()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -965,7 +965,7 @@ static void test_bb_append_buffer()
 	unsigned char rawBuffer2[10];
 	size_t buffSize2 = 10;
 	
-	byte_buffer_t buffer2;
+	ByteBuffer buffer2;
 
 	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
 	
@@ -975,7 +975,7 @@ static void test_bb_append_buffer()
 	unsigned char rawBuffer3[5];
 	size_t buffSize3 = 5;
 	
-	byte_buffer_t buffer3;
+	ByteBuffer buffer3;
 
 	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
 	
@@ -1002,7 +1002,7 @@ static void test_bb_prepend_buffer()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -1012,7 +1012,7 @@ static void test_bb_prepend_buffer()
 	unsigned char rawBuffer2[10];
 	size_t buffSize2 = 10;
 	
-	byte_buffer_t buffer2;
+	ByteBuffer buffer2;
 
 	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
 	
@@ -1022,7 +1022,7 @@ static void test_bb_prepend_buffer()
 	unsigned char rawBuffer3[5];
 	size_t buffSize3 = 5;
 	
-	byte_buffer_t buffer3;
+	ByteBuffer buffer3;
 
 	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
 	
@@ -1050,7 +1050,7 @@ static void test_bb_replace_buffer()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -1060,7 +1060,7 @@ static void test_bb_replace_buffer()
 	unsigned char rawBuffer2[10];
 	size_t buffSize2 = 10;
 	
-	byte_buffer_t buffer2;
+	ByteBuffer buffer2;
 
 	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
 	
@@ -1070,7 +1070,7 @@ static void test_bb_replace_buffer()
 	unsigned char rawBuffer3[5];
 	size_t buffSize3 = 5;
 	
-	byte_buffer_t buffer3;
+	ByteBuffer buffer3;
 
 	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
 	
@@ -1098,7 +1098,7 @@ static void test_bb_insert_buffer()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -1108,7 +1108,7 @@ static void test_bb_insert_buffer()
 	unsigned char rawBuffer2[10];
 	size_t buffSize2 = 10;
 	
-	byte_buffer_t buffer2;
+	ByteBuffer buffer2;
 
 	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
 	
@@ -1118,7 +1118,7 @@ static void test_bb_insert_buffer()
 	unsigned char rawBuffer3[5];
 	size_t buffSize3 = 5;
 	
-	byte_buffer_t buffer3;
+	ByteBuffer buffer3;
 
 	byte_buffer_init(&buffer3, BYTE_BUFFER_TRUNCATE, &rawBuffer3[0], buffSize3);
 	
@@ -1145,7 +1145,7 @@ static void test_bb_join_buffer()
 	unsigned char rawBuffer[20];
 	size_t buffSize = 20;
 	
-	byte_buffer_t buffer;
+	ByteBuffer buffer;
 
 	byte_buffer_init(&buffer, BYTE_BUFFER_TRUNCATE, &rawBuffer[0], buffSize);
 	
@@ -1155,14 +1155,14 @@ static void test_bb_join_buffer()
 	unsigned char rawBuffer2[10];
 	size_t buffSize2 = 10;
 	
-	byte_buffer_t buffer2;
+	ByteBuffer buffer2;
 
 	byte_buffer_init(&buffer2, BYTE_BUFFER_TRUNCATE, &rawBuffer2[0], buffSize2);
 	
 	byte_buffer_fill_complete(&buffer2, 'B');
 
 	//joining buffer
-	byte_buffer_t *joined = byte_buffer_join_buffer(&buffer, &buffer2, BYTE_BUFFER_RING);
+	ByteBuffer *joined = byte_buffer_join_buffer(&buffer, &buffer2, BYTE_BUFFER_RING);
 
 	assert(joined != NULL);
 	assert(joined->buffer != NULL);
