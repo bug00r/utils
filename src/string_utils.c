@@ -21,10 +21,12 @@ char * format_string_new(const char * msg, ...) {
 }
 
 char * format_string_va_new(const char * msg, va_list argptr)  {
+	va_list argptr_copy;
+	va_copy(argptr_copy, argptr);
 	int buffsize = vsnprintf(NULL, 0, msg, argptr);
 	buffsize += 1;
 	char * buffer = malloc(buffsize);
-	vsnprintf(buffer, buffsize, msg, argptr);
+	vsnprintf(buffer, buffsize, msg, argptr_copy);
 	return buffer;
 }
 

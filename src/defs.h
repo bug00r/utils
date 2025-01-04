@@ -4,8 +4,7 @@
 #ifndef EXTERN_BLOB
 	#define EXTERN_BLOB(name,suffix) \
 		extern unsigned char _binary_ ## name ## _ ## suffix ## _start; \
-        extern unsigned char _binary_ ## name ## _ ## suffix ## _end; \
-		extern unsigned char _binary_ ## name ## _ ## suffix ## _size
+        extern unsigned char _binary_ ## name ## _ ## suffix ## _end
 #endif
 
 #ifndef UNUSED
