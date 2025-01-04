@@ -548,12 +548,22 @@ static void test_bb_append_bytes_trunc()
 
 	byte_buffer_fill_complete(&buffer, 'A');
 
+	#ifdef debug
+	printf("FMT FILLED A: ");
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
+
 	byte_buffer_append_bytes_fmt(&buffer, "[%.3f]", 47.222f);
+
+	#ifdef debug
+	printf("FMT APPEND : \"[.3f]\", 47.222f = [%.3f]\n", 47.222f);
+	__test_bb_print_buffer(&rawBuffer[0], buffSize);
+	#endif
 
 	byte_buffer_append_bytes_fmt(&buffer, "[%s]", "FU");
 
 	#ifdef debug
-	printf("FMT APPEND: ");
+	printf("FMT APPEND END:");
 	__test_bb_print_buffer(&rawBuffer[0], buffSize);
 	#endif
 

@@ -222,18 +222,22 @@ void byte_buffer_append_bytes(ByteBuffer* _buffer, unsigned char* bytes, size_t 
 	}
 }
 
-static void byte_buffer_append_bytes_fmt_va(ByteBuffer* buffer, unsigned char* fmt, va_list argptr)
+static void byte_buffer_append_bytes_fmt_va(ByteBuffer* buffer, const char* fmt, va_list argptr)
 {
+	va_list args_copy;
+	va_copy(args_copy, argptr);
+
 	int buffsize = vsnprintf(NULL, 0, fmt, argptr) + 1;
 	char * bytebuffer = malloc(buffsize);
-	vsnprintf(bytebuffer, buffsize, fmt, argptr);
+
+	vsnprintf(bytebuffer, buffsize, fmt, args_copy);
 
 	byte_buffer_append_bytes(buffer, (unsigned char*)bytebuffer, buffsize-1);
 
 	free(bytebuffer);
 }
 
-void byte_buffer_append_bytes_fmt(ByteBuffer* buffer, unsigned char* fmt, ...)
+void byte_buffer_append_bytes_fmt(ByteBuffer* buffer, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);

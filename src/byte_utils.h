@@ -59,7 +59,7 @@ bool byte_buffer_is_alloc(ByteBuffer* buffer);
 //adding byte or bytes to the buffer
 void byte_buffer_append_byte(ByteBuffer* buffer, unsigned char byte);
 void byte_buffer_append_bytes(ByteBuffer* buffer, unsigned char* bytes, size_t cntBytes);
-void byte_buffer_append_bytes_fmt(ByteBuffer* buffer, unsigned char* fmt, ...);
+void byte_buffer_append_bytes_fmt(ByteBuffer* buffer, const char* fmt, ...);
 
 //replace set byte or bytes from given index
 void byte_buffer_replace_byte(ByteBuffer* buffer, size_t index, unsigned char byte);
